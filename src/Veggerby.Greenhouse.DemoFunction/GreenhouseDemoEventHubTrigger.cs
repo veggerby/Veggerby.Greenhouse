@@ -30,6 +30,21 @@ namespace Veggerby.Greenhouse
             _log = log;
         }
 
+        private async Task EnsureDevice(Measurement measurement)
+        {
+            var device = await _context.Devices.FindAsync(measurement.DeviceId);
+            if (device == null)
+            {
+                device = new Device
+                {
+                    DeviceId = measurement.DeviceId,
+                    Name = measurement.Device?.Name ?? measurement.DeviceId
+                };
+
+                await _context.Devices.AddAsync(device);
+            }
+        }
+
         [FunctionName("GreenhouseDemoEventHubTrigger")]
         public async Task Run([EventHubTrigger("demo", Connection = "veggerbygreenhouse_demo_EVENTHUB")] EventData[] events)
         {
@@ -44,6 +59,13 @@ namespace Veggerby.Greenhouse
                     // Replace these two lines with your processing logic.
                     _log.LogInformation($"C# Event Hub trigger function processed a message: {messageBody}");
                     var measurement = JsonSerializer.Deserialize<Measurement>(messageBody);
+
+                    if (string.IsNullOrEmpty(measurement.DeviceId))
+                    {
+                        measurement.DeviceId = "(default)";
+                    }
+
+                    await EnsureDevice(measurement);
 
                     _log.LogInformation($"Time\t\t: {measurement.TimeUtc.ToLocalTime()}\nTemperature\t: {measurement.Temperature}\nHumidity\t\t: {measurement.Humidity}\nPressure\t\t: {measurement.Pressure}");
 
