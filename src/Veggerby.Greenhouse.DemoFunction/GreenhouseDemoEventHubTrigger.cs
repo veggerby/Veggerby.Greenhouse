@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.WebJobs;
@@ -9,10 +10,27 @@ using Microsoft.Extensions.Logging;
 
 namespace Veggerby.Greenhouse
 {
-    public static class GreenhouseDemoTrigger
+    public class GreenhouseDemoEventHubTrigger
     {
-        [FunctionName("GreenhouseDemoTrigger")]
-        public static async Task Run([EventHubTrigger("demo", Connection = "veggerbygreenhouse_demo_EVENTHUB")] EventData[] events, ILogger log)
+        private readonly GreenhouseContext _context;
+        private readonly ILogger<GreenhouseDemoEventHubTrigger> _log;
+        public GreenhouseDemoEventHubTrigger(GreenhouseContext context, ILogger<GreenhouseDemoEventHubTrigger> log)
+        {
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (log is null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+            _context = context;
+            _log = log;
+        }
+
+        [FunctionName("GreenhouseDemoEventHubTrigger")]
+        public async Task Run([EventHubTrigger("demo", Connection = "veggerbygreenhouse_demo_EVENTHUB")] EventData[] events)
         {
             var exceptions = new List<Exception>();
 
@@ -23,7 +41,12 @@ namespace Veggerby.Greenhouse
                     string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
 
                     // Replace these two lines with your processing logic.
-                    log.LogInformation($"C# Event Hub trigger function processed a message: {messageBody}");
+                    _log.LogInformation($"C# Event Hub trigger function processed a message: {messageBody}");
+                    var measurement = JsonSerializer.Deserialize<Measurement>(messageBody);
+
+                    _log.LogInformation($"Time\t\t: {measurement.TimeUtc.ToLocalTime()}\nTemperature\t: {measurement.Temperature}\nHumidity\t\t: {measurement.Humidity}\nPressure\t\t: {measurement.Pressure}");
+
+                    _context.Measurements.Add(measurement);
                     await Task.Yield();
                 }
                 catch (Exception e)
@@ -34,13 +57,19 @@ namespace Veggerby.Greenhouse
                 }
             }
 
+            await _context.SaveChangesAsync();
+
             // Once processing of the batch is complete, if any messages in the batch failed processing throw an exception so that there is a record of the failure.
 
             if (exceptions.Count > 1)
+            {
                 throw new AggregateException(exceptions);
+            }
 
             if (exceptions.Count == 1)
+            {
                 throw exceptions.Single();
+            }
         }
     }
 }
