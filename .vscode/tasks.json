@@ -35,6 +35,25 @@
 			}
 		},
 		{
+			"label": "build-migrations",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"type": "process",
+			"dependsOn": "clean",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/src/Veggerby.Greenhouse.Migrations"
+			}
+		},
+		{
 			"label": "clean release",
 			"command": "dotnet",
 			"args": [

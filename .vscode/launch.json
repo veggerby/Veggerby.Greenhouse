@@ -2,6 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run EF Migrations",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-migrations",
+            "program": "${workspaceFolder}/src/Veggerby.Greenhouse.Migrations/bin/Debug/netcoreapp3.1/Veggerby.Greenhouse.Migrations.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Veggerby.Greenhouse.Migrations",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             "name": "Attach to .NET Functions",
             "type": "coreclr",
             "request": "attach",

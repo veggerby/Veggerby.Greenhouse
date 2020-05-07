@@ -2,6 +2,7 @@ using System;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Veggerby.Greenhouse.Core;
 
 [assembly: FunctionsStartup(typeof(Veggerby.Greenhouse.Startup))]
 

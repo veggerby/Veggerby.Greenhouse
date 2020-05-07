@@ -21,4 +21,7 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Veggerby.Greenhouse.Core\Veggerby.Greenhouse.Core.csproj" />
+  </ItemGroup>
 </Project>
