@@ -7,8 +7,8 @@ import Moment from 'react-moment';
 import Time from './Time';
 import Number from './Number';
 
-export class FetchData extends Component {
-    static displayName = FetchData.name;
+export class Measurements extends Component {
+    static displayName = Measurements.name;
 
     constructor(props) {
         super(props);
@@ -98,7 +98,7 @@ export class FetchData extends Component {
     }
 
     format(value, property) {
-        return value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + property.unit;
+        return value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
     }
 
     mapMeasurements(measurements) {
