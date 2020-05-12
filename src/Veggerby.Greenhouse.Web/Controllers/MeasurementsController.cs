@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +10,7 @@ using Veggerby.Greenhouse.Web.Models;
 namespace Veggerby.Greenhouse.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class MeasurementsController : ControllerBase
     {
         private readonly GreenhouseContext _context;
@@ -29,18 +27,45 @@ namespace Veggerby.Greenhouse.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string d, string p, int c = 100)
         {
+            if (string.IsNullOrEmpty(d) || string.IsNullOrEmpty(p))
+            {
+                return BadRequest();
+            }
+
+            var device = await _context.Devices.FindAsync(d);
+
+            if (device == null)
+            {
+                return BadRequest();
+            }
+
+            var property = await _context.Properties.FindAsync(p);
+
+            if (property == null)
+            {
+                return BadRequest();
+            }
+
             var measurements = await _context
                 .Measurements
-                .Include(x => x.Device)
-                .Include(x => x.Property)
                 .Where(x => x.DeviceId == d && x.PropertyId == p)
                 .OrderByDescending(x => x.FirstTimeUtc)
                 .Take(c)
                 .ToListAsync();
 
-            var models = _mapper.Map<MeasurementModel[]>(measurements);
+            if (!measurements.Any())
+            {
+                return NoContent();
+            }
 
-            return Ok(models);
+            var model = new MeasurementsModel
+            {
+                Device = _mapper.Map<DeviceModel>(device),
+                Property = _mapper.Map<PropertyModel>(property),
+                Measurements = _mapper.Map<MeasurementModel[]>(measurements)
+            };
+
+            return Ok(model);
         }
     }
 }
