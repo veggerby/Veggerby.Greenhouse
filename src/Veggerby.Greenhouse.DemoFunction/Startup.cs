@@ -13,7 +13,9 @@ namespace Veggerby.Greenhouse
         public override void Configure(IFunctionsHostBuilder builder)
         {
             string connectionString = Environment.GetEnvironmentVariable("veggerbygreenhouse_demo_SQL");
-            builder.Services.AddDbContext<GreenhouseContext>(options => options.UseSqlServer(connectionString, opt => opt.EnableRetryOnFailure()));
+            builder
+                .Services
+                .AddDbContext<GreenhouseContext>(options => options.UseSqlServer(connectionString, opt => opt.EnableRetryOnFailure()));
 
             /*builder.Services.AddOptions<MyOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 
 namespace Veggerby.Greenhouse.Core
@@ -11,11 +12,18 @@ namespace Veggerby.Greenhouse.Core
 
         }
 
-        public DbSet<Measurement> Measurements { get; set; }
         public DbSet<Device> Devices { get; set; }
+        public DbSet<Property> Properties { get; set; }
+        public DbSet<Measurement> Measurements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Device>()
+                .HasKey(x => x.DeviceId);
+
+            modelBuilder.Entity<Property>()
+                .HasKey(x => x.PropertyId);
+
             modelBuilder.Entity<Measurement>()
                 .HasKey(x => x.MeasurementId);
 
@@ -25,10 +33,53 @@ namespace Veggerby.Greenhouse.Core
                 .WithMany(x => x.Measurements)
                 .HasForeignKey(x => x.DeviceId);
 
-            modelBuilder.Entity<Device>()
-                .HasKey(x => x.DeviceId);
+            modelBuilder
+                .Entity<Measurement>()
+                .HasOne(x => x.Property)
+                .WithMany(x => x.Measurements)
+                .HasForeignKey(x => x.PropertyId);
 
             modelBuilder.SetDateTimeAsUtc();
+
+            var now = DateTime.UtcNow;
+
+            modelBuilder.Entity<Property>().HasData(
+                new Property
+                {
+                    PropertyId = "temperature",
+                    Name = "Temperature",
+                    Unit = "°C",
+                    Tolerance = 0.15,
+                    Decimals = 3,
+                    CreatedUtc = now
+                },
+                new Property
+                {
+                    PropertyId = "humidity",
+                    Name = "Relative Humidity",
+                    Unit = "%",
+                    Tolerance = 0.5,
+                    Decimals = 3,
+                    CreatedUtc = now
+                },
+                new Property
+                {
+                    PropertyId = "pressure",
+                    Name = "Pressure",
+                    Unit = "mbar",
+                    Tolerance = 1,
+                    Decimals = 1,
+                    CreatedUtc = now
+                },
+                new Property
+                {
+                    PropertyId = "soil_humidity",
+                    Name = "Soil Humidity",
+                    Unit = null,
+                    Tolerance = 100,
+                    Decimals = 0,
+                    CreatedUtc = now
+                });
         }
     }
 }

@@ -6,13 +6,17 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.WebJobs;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Veggerby.Greenhouse.Core;
+using Veggerby.Greenhouse.Core.Messages;
 
 namespace Veggerby.Greenhouse
 {
     public class GreenhouseDemoEventHubTrigger
     {
+        private const double DefaultTolerance = 0.01;
+
         private readonly GreenhouseContext _context;
         private readonly ILogger<GreenhouseDemoEventHubTrigger> _log;
         public GreenhouseDemoEventHubTrigger(GreenhouseContext context, ILogger<GreenhouseDemoEventHubTrigger> log)
@@ -30,18 +34,100 @@ namespace Veggerby.Greenhouse
             _log = log;
         }
 
-        private async Task EnsureDevice(Measurement measurement)
+        private async Task<Device> EnsureDevice(Signal signal)
         {
-            var device = await _context.Devices.FindAsync(measurement.DeviceId);
+            var device = await _context.Devices.FindAsync(signal.Device);
             if (device == null)
             {
                 device = new Device
                 {
-                    DeviceId = measurement.DeviceId,
-                    Name = measurement.Device?.Name ?? measurement.DeviceId
+                    DeviceId = signal.Device,
+                    Name = signal.Device
                 };
 
                 await _context.Devices.AddAsync(device);
+            }
+
+            return device;
+        }
+
+        private async Task<Property> EnsureProperty(Signal signal)
+        {
+            var property = await _context.Properties.FindAsync(signal.Property);
+            if (property == null)
+            {
+                property = new Property
+                {
+                    PropertyId = signal.Property,
+                    Name = signal.Property
+                };
+
+                await _context.Properties.AddAsync(property);
+            }
+
+            return property;
+        }
+
+        private async Task<Measurement> GetLatestMeasurement(Device device, Property property)
+        {
+            var latest = await _context
+                .Measurements
+                .Where(x => x.DeviceId == device.DeviceId && x.PropertyId == property.PropertyId)
+                .OrderByDescending(x => x.CreatedUtc)
+                .FirstOrDefaultAsync();
+
+            return latest;
+        }
+
+        private async Task SaveMeasurement(Signal signal)
+        {
+            if (signal.Value == null || string.IsNullOrEmpty(signal.Property))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(signal.Device))
+            {
+                signal.Device = "(default)";
+            }
+
+            var device = await EnsureDevice(signal);
+            var property = await EnsureProperty(signal);
+
+            var latest = await GetLatestMeasurement(device, property);
+
+            //var pow = Math.Pow(10, property.Decimals);
+            //signal.Value = Math.Round(signal.Value.Value * pow) / pow;
+
+            if (latest != null && Math.Abs(latest.Value - signal.Value.Value) < (property.Tolerance ?? DefaultTolerance))
+            {
+                latest.LastTimeUtc = signal.TimeUtc;
+                latest.SumValue += signal.Value.Value;
+                latest.MinValue = Math.Min(signal.Value.Value, latest.MinValue);
+                latest.MaxValue = Math.Max(signal.Value.Value, latest.MaxValue);
+                latest.Count++;
+                latest.UpdatedUtc = DateTime.UtcNow;
+            }
+            else
+            {
+                var now = DateTime.UtcNow;
+
+                var measurement = new Measurement
+                {
+                    DeviceId = device.DeviceId,
+                    PropertyId = property.PropertyId,
+                    FirstTimeUtc = signal.TimeUtc,
+                    LastTimeUtc = signal.TimeUtc,
+                    Value = signal.Value.Value,
+                    SumValue = signal.Value.Value,
+                    Count = 1,
+                    MinValue = signal.Value.Value,
+                    MaxValue = signal.Value.Value,
+                    CreatedUtc = now,
+                    UpdatedUtc = now
+                };
+
+                await _context.Measurements.AddAsync(measurement);
             }
         }
 
@@ -58,19 +144,11 @@ namespace Veggerby.Greenhouse
 
                     // Replace these two lines with your processing logic.
                     _log.LogInformation($"C# Event Hub trigger function processed a message: {messageBody}");
-                    var measurement = JsonSerializer.Deserialize<Measurement>(messageBody);
+                    var signal = JsonSerializer.Deserialize<Signal>(messageBody);
 
-                    if (string.IsNullOrEmpty(measurement.DeviceId))
-                    {
-                        measurement.DeviceId = "(default)";
-                    }
+                    _log.LogInformation($"Time\t\t: {signal.TimeUtc.ToLocalTime()}\nProperty\t: {signal.Property}\nValue\t\t: {signal.Value}");
 
-                    await EnsureDevice(measurement);
-
-                    _log.LogInformation($"Time\t\t: {measurement.TimeUtc.ToLocalTime()}\nTemperature\t: {measurement.Temperature}\nHumidity\t\t: {measurement.Humidity}\nPressure\t\t: {measurement.Pressure}");
-
-                    _context.Measurements.Add(measurement);
-                    await Task.Yield();
+                    await SaveMeasurement(signal);
                 }
                 catch (Exception e)
                 {

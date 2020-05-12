@@ -54,6 +54,25 @@
 			}
 		},
 		{
+			"label": "build-web",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"type": "process",
+			"dependsOn": "clean",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/src/Veggerby.Greenhouse.Web"
+			}
+		},
+		{
 			"label": "clean release",
 			"command": "dotnet",
 			"args": [
