@@ -53,6 +53,8 @@ namespace Veggerby.Greenhouse.Web.Controllers
                 .Take(c)
                 .ToListAsync();
 
+            measurements.Reverse();
+
             if (!measurements.Any())
             {
                 return NoContent();

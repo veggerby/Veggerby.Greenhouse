@@ -219,3 +219,7 @@ while True:
 
 #print('Raw ADC Value: ', chan.value)
 #print('ADC Voltage: ' + str(chan.voltage) + 'V')```
+
+## ASP.NET MVC Core + React
+
+https://docs.microsoft.com/en-us/aspnet/core/client-side/spa/react?view=aspnetcore-3.1&tabs=netcore-cli
