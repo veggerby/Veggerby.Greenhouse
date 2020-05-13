@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Veggerby.Greenhouse.Core;
 using Veggerby.Greenhouse.Web.Models;
+using System;
 
 namespace Veggerby.Greenhouse.Web.Controllers
 {
@@ -25,16 +26,16 @@ namespace Veggerby.Greenhouse.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(string d, string p, int c = 100)
+        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, string p, int h = 24)
         {
-            if (string.IsNullOrEmpty(d) || string.IsNullOrEmpty(p))
+            if (d == null || !d.Any() || string.IsNullOrEmpty(p))
             {
                 return BadRequest();
             }
 
-            var device = await _context.Devices.FindAsync(d);
+            var devices = await _context.Devices.Where(x => d.Contains(x.DeviceId)).ToListAsync();
 
-            if (device == null)
+            if (devices == null)
             {
                 return BadRequest();
             }
@@ -46,11 +47,12 @@ namespace Veggerby.Greenhouse.Web.Controllers
                 return BadRequest();
             }
 
+            var time = DateTime.UtcNow.AddHours(-h);
+
             var measurements = await _context
                 .Measurements
-                .Where(x => x.DeviceId == d && x.PropertyId == p)
+                .Where(x => d.Contains(x.DeviceId) && x.PropertyId == p && x.FirstTimeUtc > time)
                 .OrderByDescending(x => x.FirstTimeUtc)
-                .Take(c)
                 .ToListAsync();
 
             measurements.Reverse();
@@ -60,12 +62,14 @@ namespace Veggerby.Greenhouse.Web.Controllers
                 return NoContent();
             }
 
-            var model = new MeasurementsModel
-            {
-                Device = _mapper.Map<DeviceModel>(device),
-                Property = _mapper.Map<PropertyModel>(property),
-                Measurements = _mapper.Map<MeasurementModel[]>(measurements)
-            };
+            var model = measurements
+                .GroupBy(x => x.Device)
+                .Select(m => new MeasurementsModel
+                    {
+                        Device = _mapper.Map<DeviceModel>(m.Key),
+                        Property = _mapper.Map<PropertyModel>(property),
+                        Measurements = _mapper.Map<MeasurementModel[]>(m.ToList())
+                    }).ToArray();
 
             return Ok(model);
         }

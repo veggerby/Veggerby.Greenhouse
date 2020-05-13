@@ -1,202 +1,82 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Container, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import React, { Component } from 'react';
-import moment from 'moment';
-import Moment from 'react-moment';
 
-import Time from './Time';
-import Number from './Number';
+import { DeviceList } from './DeviceList';
+import { PropertyList } from './PropertyList'
+import { MeasurementChart } from './MeasurementChart';
+import { MeasurementTable } from './MeasurementTable';
+import { DeviceListSmall } from './DeviceListSmall';
+import { PropertyListSmall } from './PropertyListSmall';
 
 export class Measurements extends Component {
     static displayName = Measurements.name;
 
     constructor(props) {
         super(props);
-        this.state = { properties: [], devices: [], measurements: null, selectedDevice: null, selectedProperty: null, loading: true };
+        this.state = { measurements: null, devices: [], properties: [], selectedDevices: [], selectedProperty: null, loading: true, activeTab: "properties" };
+
+        this.selectProperty = this.selectProperty.bind(this);
+        this.selectDevice = this.toggleDevice.bind(this);
+
+        this.isSelectedProperty = this.isSelectedProperty.bind(this);
+        this.isSelectedDevice = this.isSelectedDevice.bind(this);
+
+        this.toggleDevice = this.toggleDevice.bind(this);
     }
 
     componentDidMount() {
-        this.devices();
         this.properties();
-        this.measurements(this.state.selectedDevice, this.state.selectedProperty);
-    }
-
-    selectDevice(device) {
-        this.setState({ selectedDevice: device });
-        this.measurements(device, this.state.selectedProperty);
+        this.devices();
+        this.measurements(this.state.selectedDevices, this.state.selectedProperty);
     }
 
     selectProperty(property) {
         this.setState({ selectedProperty: property });
-        this.measurements(this.state.selectedDevice, property);
+        this.measurements(this.state.selectedDevices, property);
+
+        if (this.state.selectedDevices.length) {
+            this.selectTab("chart");
+        }
+        else {
+            this.selectTab("devices");
+        }
     }
 
-    renderProperties(properties) {
-        if (!properties) {
-            return "No properties";
+    toggleDevice(device) {
+        var array = [...this.state.selectedDevices]; // make a separate copy of the array
+        var index = array.indexOf(device.id)
+        if (index !== -1) {
+            array.splice(index, 1);
+        }
+        else  {
+            array.push(device.id);
         }
 
-        var selectedId = this.state.selectedProperty ? this.state.selectedProperty.id : null;
+        console.log(array);
 
-        return (
-            <div>
-                <h2>Properties</h2>
-                <table className='table table-striped table-hover' aria-labelledby="tabelLabel">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Name</th>
-                            <th>Unit</th>
-                            <th>Tolerance</th>
-                            <th>Decimals</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {properties.map(property =>
-                            <tr key={property.id} onClick={() => this.selectProperty(property)} className={property.id == selectedId ? "table-primary" : ""}>
-                                <td>{property.id}</td>
-                                <td>{property.name}</td>
-                                <td>{property.unit}</td>
-                                <td>{property.tolerance}</td>
-                                <td>{property.decimals}</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        );
-    }
+        this.setState({selectedDevices: array});
+        this.measurements(array, this.state.selectedProperty);
 
-    renderDevices(devices) {
-        if (!devices) {
-            return "No devices";
+        if (this.state.selectedProperty) {
+            this.selectTab("chart");
         }
-
-        var selectedId = this.state.selectedDevice ? this.state.selectedDevice.id : null;
-
-        return (
-            <div>
-                <h2>Devices</h2>
-                <table className='table table-striped table-hover' aria-labelledby="tabelLabel">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {devices.map(device =>
-                            <tr key={device.id} onClick={() => this.selectDevice(device)} className={device.id == selectedId ? "table-primary" : ""}>
-                                <td>{device.id}</td>
-                                <td>{device.name}</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        );
-    }
-
-    format(value, property) {
-        return value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
-    }
-
-    mapMeasurements(measurements) {
-        var result = [];
-        measurements.forEach(measurement => {
-            if (measurement.signalCount == 1) {
-                result.push({
-                    time: moment(measurement.startTime).unix(),
-                    value: measurement.averageValue
-                });
-            }
-            else {
-                result.push({
-                    time: moment(measurement.startTime).unix(),
-                    value: measurement.averageValue
-                });
-
-                result.push({
-                    time: moment(measurement.endTime).unix(),
-                    value: measurement.averageValue
-                });
-            }
-        });
-
-        return result;
-    }
-
-    renderChart(measurements) {
-        if (!measurements) {
-            return;
+        else {
+            this.selectTab("properties");
         }
-
-        return (
-            <div>
-                <h2>{measurements.property.name} from {measurements.device.name}</h2>
-                <LineChart
-                    width={1000}
-                    height={400}
-                    data={this.mapMeasurements(measurements.measurements)}
-                    margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-                >
-                    <XAxis dataKey="time" label="Time" tickFormatter={value => moment.unix(value).fromNow()} domain={['dataMin', 'dataMax']} type='number' />
-                    <YAxis label={measurements.property.name} domain={['auto', 'auto']} />
-
-                    <Tooltip
-                        wrapperStyle={{
-                            borderColor: 'white',
-                            boxShadow: '2px 2px 3px 0px rgb(204, 204, 204)',
-                        }}
-                        contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#666666' }}
-                        labelFormatter={v => moment.unix(v).toString() + " (" + moment.unix(v).fromNow() + ")"}
-                        formatter={v => this.format(v, measurements.property)}
-                    />
-
-                    <CartesianGrid stroke="#f5f5f5" vertical={false} />
-                    <Line type="monotone" dataKey="value" stroke="#ff7300" dot={false} />
-                </LineChart>
-            </div>
-        );
     }
 
-    renderMeasurements(measurements) {
-        if (!measurements) {
-            return;
-        }
+    selectTab(tab) {
+        this.setState({ activeTab: tab });
+    }
 
-        return (
-            <div>
-                <h2>{measurements.property.name} from {measurements.device.name}</h2>
-                <table className='table table-striped' aria-labelledby="tabelLabel">
-                    <thead>
-                        <tr>
-                            <th>Start time</th>
-                            <th>End time</th>
-                            <th>Duration</th>
-                            <th>{measurements.property.name} ({measurements.property.unit})</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {measurements.measurements.map(measurement =>
-                            <tr key={measurement.startTime}>
-                                <td><Time time={measurement.startTime} /></td>
-                                <td><Time time={measurement.endTime} /></td>
-                                <td>
-                                    <Moment duration={measurement.startTime}
-                                        date={measurement.endTime}
-                                    />
-                                </td>
-                                <td><Number value={measurement.averageValue} decimals={measurements.property.decimals} /></td>
-                                <td>{measurement.signalCount}</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        );
+    isSelectedProperty(property) {
+        return this.state.selectedProperty && property.id === this.state.selectedProperty.id;
+    }
+
+    isSelectedDevice(device) {
+        var index = this.state.selectedDevices.indexOf(device.id)
+        return index !== -1;
+        //return this.state.selectedDevice && device.id == this.state.selectedDevice.id;
     }
 
     render() {
@@ -205,23 +85,37 @@ export class Measurements extends Component {
                 <Row>
                     <Col xs={6} md={12}>
                         <h1>Measurements</h1>
-                        <p>Select a property and a device to show measurements</p>
+                        {
+                            this.state.selectedProperty ?
+                                <p>Showing {this.state.selectedProperty.name}</p> :
+                                <p>Select a property and a device to show measurements</p>
+                        }
                     </Col>
                 </Row>
                 <Row>
-                    <Col>
-                        <Tabs id="measurementsTab" defaultActiveKey={1}>
-                            <Tab eventKey={1} title="Properties">
-                                {this.renderProperties(this.state.properties)}
+                    <Col xs={6} md={12}>
+                        <Tabs id="measurementsTab" activeKey={this.state.activeTab} onSelect={(k) => this.selectTab(k)}>
+                            <Tab eventKey="properties" title="Properties">
+                                <PropertyList properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
                             </Tab>
-                            <Tab eventKey={2} title="Devices">
-                                {this.renderDevices(this.state.devices)}
+                            <Tab eventKey="devices" title="Devices">
+                                <DeviceList devices={this.state.devices} selectDevice={this.toggleDevice} selectedDevice={this.isSelectedDevice} />
                             </Tab>
-                            <Tab eventKey={3} title="Chart">
-                                {this.renderChart(this.state.measurements)}
+                            <Tab eventKey="chart" title="Chart">
+                                <Container>
+                                    <Row>
+                                        <Col xs={6} md={10}>
+                                            <MeasurementChart measurements={this.state.measurements} />
+                                        </Col>
+                                        <Col xs={6} md={2}>
+                                            <PropertyListSmall properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
+                                            <DeviceListSmall devices={this.state.devices} selectDevice={this.toggleDevice} selectedDevice={this.isSelectedDevice} />
+                                        </Col>
+                                    </Row>
+                                </Container>
                             </Tab>
-                            <Tab eventKey={4} title="Table">
-                                {this.renderMeasurements(this.state.measurements)}
+                            <Tab eventKey="table" title="Table">
+                                <MeasurementTable measurements={this.state.measurements} />
                             </Tab>
                         </Tabs>
                     </Col>
@@ -230,42 +124,36 @@ export class Measurements extends Component {
         );
     }
 
-    async properties() {
-        const response = await fetch('/api/properties');
-        const data = await response.json();
-        this.setState({ properties: data });
-    }
-
     async devices() {
         const response = await fetch('/api/devices');
         const data = await response.json();
-        this.setState({ devices: data });
 
-        if (data.length === 1) {
-            this.setState({ selectedDevice: data[0] });
-        }
+        this.setState({ devices: data, loading: false, selectedDevices: data.map(d => d.id) });
     }
 
-    async measurements(device, property) {
-        if (!(device && property)) {
+    async properties() {
+        const response = await fetch('/api/properties');
+        const data = await response.json();
+        this.setState({ properties: data, loading: false });
+    }
+
+    async measurements(devices, property) {
+        if (!(devices && property)) {
             return;
         }
 
-        var params = {
-            d: device.id,
-            p: property.id
-        };
+        var params = devices.map(d => { return { k: 'd', v: d }});
+        params.push({ k: 'p', v: property.id });
 
-        var esc = encodeURIComponent;
-        var query = Object.keys(params)
-            .map(k => esc(k) + '=' + esc(params[k]))
+        var query = params
+            .map(p => encodeURIComponent(p.k) + '=' + encodeURIComponent(p.v))
             .join('&');
 
         const response = await fetch("/api/measurements?" + query);
 
         var data = null;
 
-        console.log(response);
+        //console.log(response);
 
         if (response.status === 200) {
             data = await response.json();
