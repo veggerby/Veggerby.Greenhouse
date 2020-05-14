@@ -11,6 +11,10 @@ namespace Veggerby.Greenhouse.Web.Models
                 .ForPath(x => x.Id, o => o.MapFrom(x => x.DeviceId))
                 .ReverseMap();
 
+            CreateMap<Sensor, SensorModel>()
+                .ForPath(x => x.Id, o => o.MapFrom(x => x.SensorId))
+                .ReverseMap();
+
             CreateMap<Property, PropertyModel>()
                 .ForPath(x => x.Id, o => o.MapFrom(x => x.PropertyId))
                 .ReverseMap();

@@ -13,6 +13,7 @@ namespace Veggerby.Greenhouse.Core
         }
 
         public DbSet<Device> Devices { get; set; }
+        public DbSet<Sensor> Sensors { get; set; }
         public DbSet<Property> Properties { get; set; }
         public DbSet<Measurement> Measurements { get; set; }
 
@@ -20,6 +21,9 @@ namespace Veggerby.Greenhouse.Core
         {
             modelBuilder.Entity<Device>()
                 .HasKey(x => x.DeviceId);
+
+            modelBuilder.Entity<Sensor>()
+                .HasKey(x => new { x.DeviceId, x.SensorId });
 
             modelBuilder.Entity<Property>()
                 .HasKey(x => x.PropertyId);
@@ -32,6 +36,12 @@ namespace Veggerby.Greenhouse.Core
                 .HasOne(x => x.Device)
                 .WithMany(x => x.Measurements)
                 .HasForeignKey(x => x.DeviceId);
+
+            modelBuilder
+                .Entity<Measurement>()
+                .HasOne(x => x.Sensor)
+                .WithMany(x => x.Measurements)
+                .HasForeignKey(x => new { x.DeviceId, x.SensorId });
 
             modelBuilder
                 .Entity<Measurement>()

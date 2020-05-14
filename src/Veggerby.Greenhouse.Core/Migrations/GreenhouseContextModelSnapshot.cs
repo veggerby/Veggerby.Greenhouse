@@ -66,6 +66,9 @@ namespace Veggerby.Greenhouse.Core.Migrations
                     b.Property<string>("PropertyId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("SensorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<double>("SumValue")
                         .HasColumnType("float");
 
@@ -77,9 +80,9 @@ namespace Veggerby.Greenhouse.Core.Migrations
 
                     b.HasKey("MeasurementId");
 
-                    b.HasIndex("DeviceId");
-
                     b.HasIndex("PropertyId");
+
+                    b.HasIndex("DeviceId", "SensorId");
 
                     b.ToTable("Measurements");
                 });
@@ -112,7 +115,7 @@ namespace Veggerby.Greenhouse.Core.Migrations
                         new
                         {
                             PropertyId = "temperature",
-                            CreatedUtc = new DateTime(2020, 5, 11, 8, 23, 40, 175, DateTimeKind.Utc).AddTicks(5460),
+                            CreatedUtc = new DateTime(2020, 5, 14, 5, 57, 34, 596, DateTimeKind.Utc).AddTicks(7390),
                             Decimals = 3,
                             Name = "Temperature",
                             Tolerance = 0.14999999999999999,
@@ -121,7 +124,7 @@ namespace Veggerby.Greenhouse.Core.Migrations
                         new
                         {
                             PropertyId = "humidity",
-                            CreatedUtc = new DateTime(2020, 5, 11, 8, 23, 40, 175, DateTimeKind.Utc).AddTicks(5460),
+                            CreatedUtc = new DateTime(2020, 5, 14, 5, 57, 34, 596, DateTimeKind.Utc).AddTicks(7390),
                             Decimals = 3,
                             Name = "Relative Humidity",
                             Tolerance = 0.5,
@@ -130,12 +133,39 @@ namespace Veggerby.Greenhouse.Core.Migrations
                         new
                         {
                             PropertyId = "pressure",
-                            CreatedUtc = new DateTime(2020, 5, 11, 8, 23, 40, 175, DateTimeKind.Utc).AddTicks(5460),
+                            CreatedUtc = new DateTime(2020, 5, 14, 5, 57, 34, 596, DateTimeKind.Utc).AddTicks(7390),
                             Decimals = 1,
                             Name = "Pressure",
                             Tolerance = 1.0,
                             Unit = "mbar"
+                        },
+                        new
+                        {
+                            PropertyId = "soil_humidity",
+                            CreatedUtc = new DateTime(2020, 5, 14, 5, 57, 34, 596, DateTimeKind.Utc).AddTicks(7390),
+                            Decimals = 0,
+                            Name = "Soil Humidity",
+                            Tolerance = 100.0
                         });
+                });
+
+            modelBuilder.Entity("Veggerby.Greenhouse.Core.Sensor", b =>
+                {
+                    b.Property<string>("DeviceId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SensorId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DeviceId", "SensorId");
+
+                    b.ToTable("Sensors");
                 });
 
             modelBuilder.Entity("Veggerby.Greenhouse.Core.Measurement", b =>
@@ -147,6 +177,19 @@ namespace Veggerby.Greenhouse.Core.Migrations
                     b.HasOne("Veggerby.Greenhouse.Core.Property", "Property")
                         .WithMany("Measurements")
                         .HasForeignKey("PropertyId");
+
+                    b.HasOne("Veggerby.Greenhouse.Core.Sensor", "Sensor")
+                        .WithMany("Measurements")
+                        .HasForeignKey("DeviceId", "SensorId");
+                });
+
+            modelBuilder.Entity("Veggerby.Greenhouse.Core.Sensor", b =>
+                {
+                    b.HasOne("Veggerby.Greenhouse.Core.Device", "Device")
+                        .WithMany("Sensors")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

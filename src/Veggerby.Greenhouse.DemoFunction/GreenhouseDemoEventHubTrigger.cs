@@ -51,6 +51,24 @@ namespace Veggerby.Greenhouse
             return device;
         }
 
+        private async Task<Sensor> EnsureSensor(Device device, Signal signal)
+        {
+            var sensor = await _context.Sensors.FindAsync(signal.Device, signal.Sensor);
+            if (sensor == null)
+            {
+                sensor = new Sensor
+                {
+                    DeviceId = signal.Device,
+                    SensorId = signal.Sensor,
+                    Name = $"{signal.Sensor}@{signal.Device}"
+                };
+
+                await _context.Sensors.AddAsync(sensor);
+            }
+
+            return sensor;
+        }
+
         private async Task<Property> EnsureProperty(Signal signal)
         {
             var property = await _context.Properties.FindAsync(signal.Property);
@@ -68,11 +86,11 @@ namespace Veggerby.Greenhouse
             return property;
         }
 
-        private async Task<Measurement> GetLatestMeasurement(Device device, Property property)
+        private async Task<Measurement> GetLatestMeasurement(Sensor sensor, Property property)
         {
             var latest = await _context
                 .Measurements
-                .Where(x => x.DeviceId == device.DeviceId && x.PropertyId == property.PropertyId)
+                .Where(x => x.DeviceId == sensor.DeviceId && x.SensorId == sensor.SensorId && x.PropertyId == property.PropertyId)
                 .OrderByDescending(x => x.CreatedUtc)
                 .FirstOrDefaultAsync();
 
@@ -91,10 +109,16 @@ namespace Veggerby.Greenhouse
                 signal.Device = "(default)";
             }
 
+            if (string.IsNullOrEmpty(signal.Sensor))
+            {
+                signal.Sensor = "(default)";
+            }
+
             var device = await EnsureDevice(signal);
+            var sensor = await EnsureSensor(device, signal);
             var property = await EnsureProperty(signal);
 
-            var latest = await GetLatestMeasurement(device, property);
+            var latest = await GetLatestMeasurement(sensor, property);
 
             //var pow = Math.Pow(10, property.Decimals);
             //signal.Value = Math.Round(signal.Value.Value * pow) / pow;
@@ -114,7 +138,10 @@ namespace Veggerby.Greenhouse
 
                 var measurement = new Measurement
                 {
-                    DeviceId = device.DeviceId,
+                    DeviceId = sensor.DeviceId,
+                    Device = device,
+                    SensorId = sensor.DeviceId,
+                    Sensor = sensor,
                     PropertyId = property.PropertyId,
                     FirstTimeUtc = signal.TimeUtc,
                     LastTimeUtc = signal.TimeUtc,

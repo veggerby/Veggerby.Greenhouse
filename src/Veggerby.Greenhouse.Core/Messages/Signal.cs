@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Veggerby.Greenhouse.Core.Messages
@@ -8,6 +7,9 @@ namespace Veggerby.Greenhouse.Core.Messages
     {
         [JsonPropertyName("device")]
         public string Device { get; set; }
+
+        [JsonPropertyName("sensor")]
+        public string Sensor { get; set; }
 
         [JsonPropertyName("property")]
         public string Property { get; set; }

@@ -4,25 +4,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Veggerby.Greenhouse.Core
 {
-    public class Property
+    public class Sensor
     {
         [Column(Order = 0)]
-        public string PropertyId { get; set; }
+        public string DeviceId { get; set; }
 
         [Column(Order = 1)]
-        public string Name { get; set; }
+        public string SensorId { get; set; }
 
         [Column(Order = 2)]
-        public string Unit { get; set; }
+        public string Name { get; set; }
 
         [Column(Order = 3)]
-        public double? Tolerance { get; set; } = 0.01;
-
-        [Column(Order = 4)]
-        public int Decimals { get; set; } = 3;
-
-        [Column(Order = 5)]
         public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+
+        public Device Device { get; set; }
 
         public IList<Measurement> Measurements { get; set; }
     }

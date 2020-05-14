@@ -26,16 +26,21 @@ namespace Veggerby.Greenhouse.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, string p, int h = 24)
+        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, [FromQuery(Name="s")] string[] s, string p, int h = 24)
         {
-            if (d == null || !d.Any() || string.IsNullOrEmpty(p))
+            d = d ?? Array.Empty<string>();
+            s = s ?? Array.Empty<string>();
+
+            if (!(d.Any() || s.Any()) || (d.Any() && s.Any()) || string.IsNullOrEmpty(p))
             {
                 return BadRequest();
             }
 
             var devices = await _context.Devices.Where(x => d.Contains(x.DeviceId)).ToListAsync();
 
-            if (devices == null)
+            var sensors = await _context.Sensors.Where(x => s.Contains(x.SensorId + "@" + x.DeviceId)).ToListAsync();
+
+            if ((devices?.Any() ?? false) && (sensors?.Any() ?? false))
             {
                 return BadRequest();
             }
@@ -51,7 +56,10 @@ namespace Veggerby.Greenhouse.Web.Controllers
 
             var measurements = await _context
                 .Measurements
-                .Where(x => d.Contains(x.DeviceId) && x.PropertyId == p && x.FirstTimeUtc > time)
+                .Include(x => x.Device)
+                .Include(x => x.Sensor)
+                    .ThenInclude(x => x.Device)
+                .Where(x => (d.Contains(x.DeviceId) || s.Contains(x.SensorId + "@" + x.DeviceId)) && x.PropertyId == p && x.FirstTimeUtc > time)
                 .OrderByDescending(x => x.FirstTimeUtc)
                 .ToListAsync();
 
@@ -63,10 +71,10 @@ namespace Veggerby.Greenhouse.Web.Controllers
             }
 
             var model = measurements
-                .GroupBy(x => x.Device)
+                .GroupBy(x => x.Sensor)
                 .Select(m => new MeasurementsModel
                     {
-                        Device = _mapper.Map<DeviceModel>(m.Key),
+                        Sensor = _mapper.Map<SensorModel>(m.Key),
                         Property = _mapper.Map<PropertyModel>(property),
                         Measurements = _mapper.Map<MeasurementModel[]>(m.ToList())
                     }).ToArray();

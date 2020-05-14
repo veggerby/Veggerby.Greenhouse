@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend } from 'recharts';
 import React from 'react';
 import moment from 'moment';
 import { Container } from 'react-bootstrap';
@@ -46,8 +46,22 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                 height={400}
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
             >
-                <XAxis dataKey="time" label={{ value: "Time", position: "insideBottomRight", dy: 10 }} tickFormatter={value => moment.unix(value).fromNow()} domain={['dataMin', 'dataMax']} type='number' />
-                <YAxis dataKey="value" label={{ value: measurements[0].property.name + " (" + measurements[0].property.unit + ")", position: "insideLeft", angle: -90, dx: -5 }} domain={['auto', 'auto']} />
+                <XAxis dataKey="time" domain={['dataMin', 'dataMax']} type='number' tickFormatter={value => moment.unix(value).fromNow()}>
+                    <Label
+                        value="Time"
+                        position="insideBottomRight"
+                        dy={10}
+                    />
+                </XAxis>
+
+                <YAxis dataKey="value" domain={['auto', 'auto']}>
+                    <Label
+                        value={measurements[0].property.name + " (" + measurements[0].property.unit + ")"}
+                        position="outside"
+                        angle={-90}
+                        dx={-10}
+                    />
+                </YAxis>
 
                 <Tooltip
                     wrapperStyle={{
@@ -62,8 +76,10 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
 
                 <CartesianGrid stroke="#f5f5f5" vertical={false} />
                 {measurements.map((measurement, ixc) =>
-                    <Line key={measurement.device.id} type="monotone" data={mapMeasurements(measurement)} dataKey="value" stroke={colors[ixc % colors.length]} dot={false} name={measurement.device.id} />
+                    <Line key={measurement.sensor.key} type="monotone" data={mapMeasurements(measurement)} dataKey="value" stroke={colors[ixc % colors.length]} dot={false} name={measurement.sensor.key} />
                 )}
+
+                <Legend />
             </LineChart>
         </Container>
     ) : "No measurements";

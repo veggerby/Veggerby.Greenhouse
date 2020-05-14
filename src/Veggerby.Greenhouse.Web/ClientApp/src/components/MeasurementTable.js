@@ -11,14 +11,15 @@ export const MeasurementTable = ({ measurements }) => measurements && measuremen
         <Container>
             {
                 measurements.map(m =>
-                    <div key={m.device.id}>
-                        <h2>{m.property.name} from {m.device.name}</h2>
+                    <div key={m.sensor.key}>
+                        <h2>{m.property.name} from {m.sensor.name} on {m.sensor.device.name}</h2>
                             <Table striped aria-labelledby="tabelLabel">
                                 <thead>
                                     <tr>
                                         <th>Start time</th>
                                         <th>End time</th>
                                         <th>Device</th>
+                                        <th>Sensor</th>
                                         <th>Duration</th>
                                         <th>{m.property.name} ({m.property.unit})</th>
                                         <th>Count</th>
@@ -29,7 +30,8 @@ export const MeasurementTable = ({ measurements }) => measurements && measuremen
                                         <tr key={measurement.startTime}>
                                             <td><Time time={measurement.startTime} /></td>
                                             <td><Time time={measurement.endTime} /></td>
-                                            <td>{measurement.deviceId}</td>
+                                            <td>{m.sensor.device.name}</td>
+                                            <td>{m.sensor.name}</td>
                                             <td>
                                                 <Moment duration={measurement.startTime}
                                                     date={measurement.endTime}
