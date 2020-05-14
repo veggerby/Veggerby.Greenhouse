@@ -29,7 +29,7 @@ stages:
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
-        command: 'publish'
+        command: 'build'
         projects: |
           '$(Build.SourcesDirectory)/src/Veggerby.Greenhouse.DemoFunction/*.csproj'
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
