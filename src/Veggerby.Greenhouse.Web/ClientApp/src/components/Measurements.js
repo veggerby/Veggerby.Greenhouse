@@ -146,7 +146,7 @@ export class Measurements extends Component {
                                         </Col>
                                         <Col xs={6} md={2}>
                                             <PropertyListSmall properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
-                                            <SensorListSmall sensors={this.state.sensors} selectSensor={this.selectSensor} selectedSensor={this.isSelectedSensor} />
+                                            <SensorListSmall sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
                                         </Col>
                                     </Row>
                                 </Container>
