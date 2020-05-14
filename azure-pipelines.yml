@@ -9,6 +9,9 @@ variables:
   # Function app name
   functionAppName: 'veggerby-greenhouse-demo'
 
+  # Web app name
+  webAppName: 'veggerby-greenhouse'
+
   # Environment name
   environmentName: 'veggerby-greenhouse-demo'
 
@@ -27,11 +30,18 @@ stages:
 
     steps:
     - task: DotNetCoreCLI@2
-      displayName: Build
+      displayName: Build functions
       inputs:
         command: 'build'
         projects: '$(System.DefaultWorkingDirectory)/src/Veggerby.Greenhouse.DemoFunction/*.csproj'
         arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
+    - task: DotNetCoreCLI@2
+      displayName: Publish web
+      inputs:
+        command: 'publish'
+        arguments: '--output $(Build.ArtifactStagingDirectory)/Web_$(Build.BuildId).zip --configuration Release'
+        publishWebProjects: true
+        modifyOutputPath: false
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
@@ -39,10 +49,10 @@ stages:
         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
         includeRootFolder: false
         archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/Function_$(Build.BuildId).zip
         replaceExistingArchive: true
 
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+    - publish: $(Build.ArtifactStagingDirectory)/Function_$(Build.BuildId).zip
       artifact: drop
 
 
@@ -66,4 +76,12 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
               appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/drop/Function_$(Build.BuildId).zip'
+              
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webAppLinux'
+              WebAppName: $(webAppName)
+              packageForLinux: '$(Pipeline.Workspace)/drop/Web_$(Build.BuildId).zip'
