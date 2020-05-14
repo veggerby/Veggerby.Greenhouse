@@ -52,7 +52,7 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/Function_$(Build.BuildId).zip
         replaceExistingArchive: true
 
-    - publish: $(Build.ArtifactStagingDirectory)/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)
       artifact: drop
 
 
