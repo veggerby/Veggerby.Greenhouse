@@ -12,6 +12,43 @@ https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/README.md
 
 https://www.hanselman.com/blog/VisualStudioCodeRemoteDevelopmentOverSSHToARaspberryPiIsButter.aspx
 
+### Connect via SSH
+
+https://unix.stackexchange.com/questions/182483/scp-without-password-prompt-using-different-username
+
+What you want are ssh-key pairs, these create 'trusted networks' that allow for password-less authentication:
+
+On your client (server1):
+
+```
+[user@server1]# ssh-keygen -t rsa -b 2048
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): # Hit Enter
+Enter passphrase (empty for no passphrase): # Hit Enter
+Enter same passphrase again: # Hit Enter
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+```
+
+Now copy your public key to your remote server (server2):
+
+```
+ssh-copy-id user2@server2
+```
+
+[OR]
+
+```
+cat ~/.ssh/id_rsa.pub | ssh user2@server2 "mkdir -p ~/.ssh \
+    && cat >>  ~/.ssh/authorized_keys"
+```
+
+Now when you run the scp (or any other ssh) command you shouldn't be prompted for a password:
+
+```
+scp file user2@server2:/drop/location
+```
+
 ## GPIO Zero
 
 https://gpiozero.readthedocs.io/en/stable/index.html
@@ -100,12 +137,16 @@ pijuice_cli
 
 ## Python3/pip
 
+Install python 3.7 + pip
+
+`sudo apt-get install python3.7 python3-pip`
+
 https://learn.sparkfun.com/tutorials/python-programming-tutorial-getting-started-with-the-raspberry-pi/configure-your-pi
 
 https://realpython.com/python-logging/
 
 ### Upgrade Pip
-pip install --upgrade pip
+`pip install --upgrade pip`
 
 ## Azure EventHub
 
@@ -146,31 +187,32 @@ https://crontab.guru/every-10-minutes
 
 ## Sparkfun Soil Moisture sensor
 
-https://let-elektronik.dk/shop/1500-biometri--gas/13637--soil-moisture-sensor-with-screw-terminals/
+[product](https://let-elektronik.dk/shop/1500-biometri--gas/13637--soil-moisture-sensor-with-screw-terminals/)
 
-https://learn.sparkfun.com/tutorials/soil-moisture-sensor-hookup-guide/all
+[sparkfun](https://www.sparkfun.com/products/13637)
 
-https://www.instructables.com/id/Soil-Moisture-Sensor-Raspberry-Pi/
+[hookup](https://learn.sparkfun.com/tutorials/soil-moisture-sensor-hookup-guide/all)
 
-https://github.com/jerbly/tutorials/blob/master/moisture/moist_final.py
+[sample code](https://github.com/jerbly/tutorials/blob/master/moisture/moist_final.py)
 
 https://computers.tutsplus.com/tutorials/build-a-raspberry-pi-moisture-sensor-to-monitor-your-plants--mac-52875
 
 https://thepihut.com/blogs/raspberry-pi-tutorials/raspberry-pi-plant-pot-moisture-sensor-with-email-notification-tutorial
 
-https://www.sparkfun.com/products/13637
 
 https://www.instructables.com/id/Soil-Moisture-Sensor-Raspberry-Pi/
 
 ## Adafruit RGB Negative 16x2 LCD
 
-https://www.adafruit.com/product/1110
+[product](https://www.adafruit.com/product/1110)
 
-https://learn.adafruit.com/adafruit-16x2-character-lcd-plus-keypad-for-raspberry-pi
+[guide](https://learn.adafruit.com/adafruit-16x2-character-lcd-plus-keypad-for-raspberry-pi) ([assembly](https://learn.adafruit.com/adafruit-16x2-character-lcd-plus-keypad-for-raspberry-pi/assembly), [solder](https://www.makerspaces.com/how-to-solder/))
+
+[library](https://github.com/adafruit/Adafruit_CircuitPython_CharLCD)
+
+[docs](https://circuitpython.readthedocs.io/projects/charlcd/en/latest/) ([all projects](https://circuitpython.readthedocs.io/projects/bundle/en/latest/drivers.html))
 
 ## MCP3008
-
-https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/examples/simpletest.py
 
 Deprecated
 
@@ -178,9 +220,9 @@ https://learn.adafruit.com/raspberry-pi-analog-to-digital-converters/mcp3008
 
 Future
 
-https://learn.adafruit.com/circuitpython-basics-i2c-and-spi/spi-devices
+[SPI Devices](https://learn.adafruit.com/circuitpython-basics-i2c-and-spi/spi-devices)
 
-https://github.com/adafruit/Adafruit_CircuitPython_MCP3xxx/
+[Adafruit MCP3xxxx library](https://github.com/adafruit/Adafruit_CircuitPython_MCP3xxx/) ([sample](https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/examples/simpletest.py))
 
 ```import time
 import busio
@@ -218,8 +260,15 @@ while True:
 #chan = AnalogIn(mcp, MCP.P7)
 
 #print('Raw ADC Value: ', chan.value)
-#print('ADC Voltage: ' + str(chan.voltage) + 'V')```
+#print('ADC Voltage: ' + str(chan.voltage) + 'V')
+```
 
-## ASP.NET MVC Core + React
+## Web
 
-https://docs.microsoft.com/en-us/aspnet/core/client-side/spa/react?view=aspnetcore-3.1&tabs=netcore-cli
+[ASP.NET MVC Core + React](https://docs.microsoft.com/en-us/aspnet/core/client-side/spa/react?view=aspnetcore-3.1&tabs=netcore-cli)
+
+[react-bootstrap](https://react-bootstrap.github.io/)
+
+## Other stuff
+
+[RPi - IoT Weather Station](https://www.instructables.com/id/RPi-IoT-Weather-Station/)

@@ -26,7 +26,7 @@ namespace Veggerby.Greenhouse.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, [FromQuery(Name="s")] string[] s, string p, int h = 24)
+        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, [FromQuery(Name="s")] string[] s, string p, int h = 24, int c = 0)
         {
             d = d ?? Array.Empty<string>();
             s = s ?? Array.Empty<string>();
@@ -61,6 +61,7 @@ namespace Veggerby.Greenhouse.Web.Controllers
                     .ThenInclude(x => x.Device)
                 .Where(x => (d.Contains(x.DeviceId) || s.Contains(x.SensorId + "@" + x.DeviceId)) && x.PropertyId == p && x.FirstTimeUtc > time)
                 .OrderByDescending(x => x.FirstTimeUtc)
+                .Take(c > 0 ? c : int.MaxValue)
                 .ToListAsync();
 
             measurements.Reverse();

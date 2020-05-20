@@ -3,5 +3,7 @@
     "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~3",
     "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.preDeployTask": "publish"
+    "azureFunctions.preDeployTask": "publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/221f268a-c2c4-4053-a2c6-bd70774998cd/resourceGroups/Greenhouse/providers/Microsoft.Web/sites/veggerby-greenhouse",
+    "appService.deploySubpath": "publish/Veggerby.Greenhouse.Web",
 }
