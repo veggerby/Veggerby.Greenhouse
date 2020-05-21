@@ -40,15 +40,20 @@ export class Measurements extends Component {
         this.properties();
         this.devices();
         this.sensors();
-        this.measurements(this.state.selectedSensors, this.state.selectedProperty);
     }
 
     selectProperty(property) {
         this.setState({ selectedProperty: property });
-        this.measurements(this.state.selectedSensors, property);
+        this.switchTab(property);
+    }
 
-        if (this.state.selectedSensors.length) {
+    switchTab(property, selectedSensors) {
+        if ((property || this.state.selectedProperty) && (selectedSensors || this.state.selectedSensors.length)) {
+            this.measurements(selectedSensors || this.state.selectedSensors, property || this.state.selectedProperty);
             this.selectTab("chart");
+        }
+        else if (this.state.selectedSensors.length) {
+            this.selectTab("properties");
         }
         else {
             this.selectTab("sensors");
@@ -84,13 +89,6 @@ export class Measurements extends Component {
 
         this.setState({selectedSensors: array});
         this.measurements(array, this.state.selectedProperty);
-
-        if (this.state.selectedProperty) {
-            this.selectTab("chart");
-        }
-        else {
-            this.selectTab("properties");
-        }
     }
 
     selectTab(tab) {
@@ -117,7 +115,7 @@ export class Measurements extends Component {
         return (
             <Container>
                 <Row>
-                    <Col xs={6} md={12}>
+                    <Col xs={12} md={12}>
                         <h1>Measurements</h1>
                         {
                             this.state.selectedProperty ?
@@ -127,29 +125,21 @@ export class Measurements extends Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Col xs={6} md={12}>
-                        <Tabs id="measurementsTab" activeKey={this.state.activeTab} onSelect={(k) => this.selectTab(k)}>
+                    <Col xs={12} md={12}>
+                        <Tabs id="measurementsTab" activeKey={this.state.activeTab} onSelect={(k) => this.selectTab(k)} variant="pills">
+                            <Tab eventKey="chart" title="Chart">
+                                <MeasurementChart measurements={this.state.measurements} />
+                                <PropertyListSmall properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
+                                <SensorListSmall sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
+                            </Tab>
                             <Tab eventKey="properties" title="Properties">
                                 <PropertyList properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
-                            </Tab>
-                            <Tab eventKey="devices" title="Devices">
-                                <DeviceList devices={this.state.devices} selectDevice={this.toggleDevice} selectedDevice={this.isSelectedDevice} />
                             </Tab>
                             <Tab eventKey="sensors" title="Sensors">
                                 <SensorList sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
                             </Tab>
-                            <Tab eventKey="chart" title="Chart">
-                                <Container>
-                                    <Row>
-                                        <Col xs={6} md={10}>
-                                            <MeasurementChart measurements={this.state.measurements} />
-                                        </Col>
-                                        <Col xs={6} md={2}>
-                                            <PropertyListSmall properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
-                                            <SensorListSmall sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
-                                        </Col>
-                                    </Row>
-                                </Container>
+                            <Tab eventKey="devices" title="Devices">
+                                <DeviceList devices={this.state.devices} selectDevice={this.toggleDevice} selectedDevice={this.isSelectedDevice} />
                             </Tab>
                             <Tab eventKey="table" title="Table">
                                 <MeasurementTable measurements={this.state.measurements} />
@@ -166,6 +156,7 @@ export class Measurements extends Component {
         const data = await response.json();
 
         this.setState({ devices: data, loading: false });
+        this.switchTab();
     }
 
     async sensors() {
@@ -173,12 +164,22 @@ export class Measurements extends Component {
         const data = await response.json();
 
         this.setState({ sensors: data, loading: false, selectedSensors: data.map(s => s.key) });
+        this.switchTab();
     }
 
     async properties() {
         const response = await fetch('/api/properties');
         const data = await response.json();
-        this.setState({ properties: data, loading: false });
+
+        var property = null;
+
+        if (data && data.length > 0) {
+            property = data[0];
+        }
+
+        this.setState({ properties: data, selectedProperty: property, loading: false });
+
+        this.switchTab();
     }
 
     async measurements(sensors, property) {
