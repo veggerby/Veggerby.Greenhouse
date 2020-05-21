@@ -63,6 +63,7 @@ class PropertyMenuItem(MenuItem):
 
     def run(self, state, controller):
         state.selected_property = self.property
+        state.selected_measurement = None
         super().run(state, controller)
 
 
@@ -73,6 +74,7 @@ class SensorMenuItem(MenuItem):
 
     def run(self, state, controller):
         state.selected_sensor = self.sensor
+        state.selected_measurement = None
         super().run(state, controller)
 
 
