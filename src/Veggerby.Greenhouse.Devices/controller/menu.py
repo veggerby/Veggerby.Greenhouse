@@ -1,5 +1,5 @@
-import requests
-
+import requests, socket
+from camera import take_and_upload_photo
 
 class MenuItem(object):
     def __init__(self, id, name):
@@ -78,7 +78,7 @@ class SensorMenuItem(MenuItem):
         super().run(state, controller)
 
 
-class MeasurementItem(MenuItem):
+class MeasurementMenuItem(MenuItem):
     def __init__(self):
         super().__init__("measure", "Get measure")
 
@@ -88,4 +88,13 @@ class MeasurementItem(MenuItem):
         measurement = response.json()
         state.selected_measurement = measurement[0]['measurements'][0]
 
+        super().run(state, controller)
+
+
+class PhotoMenuItem(MenuItem):
+    def __init__(self):
+        super().__init__("photo", "Take photo")
+
+    def run(self, state, controller):
+        take_and_upload_photo(socket.gethostname(), True)
         super().run(state, controller)

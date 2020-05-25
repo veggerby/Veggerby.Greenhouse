@@ -28,18 +28,12 @@ class Controller(object):
         self._lcd.message = message
 
     def on(self):
-        if (self._lcd.display):
-            return
-
-        self._lcd.display = True
-
         self._lcd.color = [100, 0, 0]
         self._lcd.clear()
 
     def off(self):
-        if self._lcd.display:
-            self._lcd.clear()
-            self._lcd.display = False
+        self._lcd.color = [0, 0, 0]
+        self._lcd.clear()
 
     def print_menu(self, menu):
         self.print_message("{0}\n{1}".format(

@@ -81,6 +81,8 @@ https://projects.raspberrypi.org/en/projects/getting-started-with-picamera
 
 ```pip install picamera```
 
+https://picamera.readthedocs.org/
+
 ## Temperature/humidity sensor
 
 ### References
@@ -176,6 +178,10 @@ Add the IP to the database access
 brew link --overwrite azure-functions-core-tools@3
 
 Can also be installed via npm
+
+## Azure Blob
+
+https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python
 
 ## EF Core
 
