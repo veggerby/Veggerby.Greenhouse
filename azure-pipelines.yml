@@ -34,27 +34,37 @@ stages:
       inputs:
         command: 'build'
         projects: '$(System.DefaultWorkingDirectory)/src/Veggerby.Greenhouse.DemoFunction/*.csproj'
-        arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
-    - task: DotNetCoreCLI@2
-      displayName: Publish web
-      inputs:
-        command: 'publish'
-        arguments: '--output $(Build.ArtifactStagingDirectory)/Web_$(Build.BuildId).zip --configuration Release'
-        publishWebProjects: true
-        modifyOutputPath: false
+        arguments: '--output $(System.DefaultWorkingDirectory)/publish/function --configuration Release'
 
     - task: ArchiveFiles@2
-      displayName: 'Archive files'
+      displayName: 'Archive functions'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish/function'
         includeRootFolder: false
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/Function_$(Build.BuildId).zip
         replaceExistingArchive: true
 
+    - task: DotNetCoreCLI@2
+      displayName: Publish web
+      inputs:
+        command: 'publish'
+        projects: '$(System.DefaultWorkingDirectory)/src/Veggerby.Greenhouse.Web/*.csproj'
+        arguments: '--output $(System.DefaultWorkingDirectory)/publish/web --configuration Release'
+        publishWebProjects: true
+        modifyOutputPath: false
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive web'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish/web'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/Web_$(Build.BuildId).zip
+        replaceExistingArchive: true
+
     - publish: $(Build.ArtifactStagingDirectory)
       artifact: drop
-
 
 - stage: Deploy
   displayName: Deploy stage
