@@ -279,6 +279,26 @@ while True:
 
 [react-bootstrap](https://react-bootstrap.github.io/)
 
+## Auth0
+
+https://auth0.com/blog/how-to-build-and-secure-web-apis-with-aspnet-core-3/#Securing-the-API-with-Auth0
+
+https://auth0.com/blog/manage-a-collection-of-secure-api-endpoints-with-postman/#Authorization-in-Postman
+
+| Param                 | Value                                                           |
+| --------------------- | --------------------------------------------------------------- |
+| Token Name            | veggerby.greenhouse                                             |
+| Grant Type            | Authorization Code                                              |
+| Callback URL          | https://www.getpostman.com/oauth2/callback                      |
+| Auth URL              | https://{{auth0_domain}}/authorize?audience={{auth0_audience}}  |
+| Access Token URL      | https://{{auth0_domain}}/oauth/token                            |
+| Client ID             | {{auth0_client_id}}                                             |
+| Client Secret         | {{auth0_client_secret}}                                         |
+| Scope                 | openid profile email                                            |
+| State                 | random                                                          |
+| Client Authentication | Send client credentials in body                                 |
+
+
 ## Other stuff
 
 [RPi - IoT Weather Station](https://www.instructables.com/id/RPi-IoT-Weather-Station/)

@@ -7,11 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Veggerby.Greenhouse.Core;
 using Veggerby.Greenhouse.Web.Models;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Veggerby.Greenhouse.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class MeasurementsController : ControllerBase
     {
         private readonly GreenhouseContext _context;

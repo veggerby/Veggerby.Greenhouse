@@ -6,11 +6,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Veggerby.Greenhouse.Core;
 using Veggerby.Greenhouse.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Veggerby.Greenhouse.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PropertiesController : ControllerBase
     {
         private readonly GreenhouseContext _context;
