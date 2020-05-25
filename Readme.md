@@ -77,6 +77,10 @@ https://github.com/Hermann-SW/fork-raspiraw
 
 https://www.raspberrypi.org/documentation/usage/camera/raspicam/timelapse.md
 
+https://projects.raspberrypi.org/en/projects/getting-started-with-picamera
+
+```pip install picamera```
+
 ## Temperature/humidity sensor
 
 ### References
