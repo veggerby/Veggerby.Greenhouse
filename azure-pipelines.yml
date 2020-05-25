@@ -49,9 +49,9 @@ stages:
       displayName: Publish web
       inputs:
         command: 'publish'
-        projects: '$(System.DefaultWorkingDirectory)/src/Veggerby.Greenhouse.Web/*.csproj'
-        arguments: '--output $(System.DefaultWorkingDirectory)/publish/web --configuration Release'
         publishWebProjects: true
+        arguments: '--output $(System.DefaultWorkingDirectory)/publish/web --configuration Release'
+        zipAfterPublish: false
         modifyOutputPath: false
 
     - task: ArchiveFiles@2
