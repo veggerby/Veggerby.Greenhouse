@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Tabs, Tab } from 'react-bootstrap';
 
 import { DeviceList } from './DeviceList';
@@ -9,201 +9,164 @@ import { PropertyListSmall } from './PropertyListSmall';
 import { SensorListSmall } from './SensorListSmall';
 import { SensorList } from './SensorList';
 
-export class Measurements extends Component {
-    static displayName = Measurements.name;
+import * as sensorsApi from '../api/sensorsApi'
+import * as devicesApi from '../api/devicesApi'
+import * as propertiesApi from '../api/propertiesApi'
+import * as measurementsApi from '../api/measurementsApi'
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            measurements: null,
-            devices: [],
-            sensors: [],
-            properties: [],
-            selectedDevices: [],
-            selectedSensors: [],
-            selectedProperty: null,
-            loading: true,
-            activeTab: "properties"
+import { useAuth0 } from "../react-auth0-spa";
+
+export const Measurements = () => {
+    const { getTokenSilently } = useAuth0();
+
+    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(false);
+
+    const [activeTab, setActiveTab] = useState('chart');
+
+    const [properties, setProperties] = useState([]);
+    const [devices, setDevices] = useState([]);
+    const [sensors, setSensors] = useState([]);
+    const [measurements, setMeasurements] = useState([]);
+
+    const [selectedProperty, selectProperty] = useState(null);
+    const [selectedSensors, setSelectedSensors] = useState([]);
+    const [selectedDevices, setSelectedDevices] = useState([]);
+
+    const [token, setToken] = useState(null);
+
+    useEffect(() => {
+        const getToken = async () => {
+            setLoading(true);
+
+            const token = await getTokenSilently();
+            setToken(token);
+
+            setLoading(false);
+        }
+
+        getToken();
+        // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        const populateInitialData = async () => {
+            if (!token) {
+                return;
+            }
+
+            setLoading(true);
+
+            const sensorData = await sensorsApi.get(token);
+            setSensors(sensorData);
+            if (sensorData && sensorData.length) {
+                setSelectedSensors(sensorData);
+            }
+
+            const deviceData = await devicesApi.get(token);
+            setDevices(deviceData);
+
+            const propertiesData = await propertiesApi.get(token);
+            setProperties(propertiesData);
+
+            if (propertiesData && propertiesData.length) {
+                selectProperty(propertiesData[0]);
+            }
+
+            setLoading(false);
         };
 
-        this.selectProperty = this.selectProperty.bind(this);
+        populateInitialData();
+    }, [token]);
 
-        this.isSelectedProperty = this.isSelectedProperty.bind(this);
-        this.isSelectedDevice = this.isSelectedDevice.bind(this);
-        this.isSelectedSensor = this.isSelectedSensor.bind(this);
+    useEffect(() => {
+        const populateMeasurementsData = async () => {
+            if (!(token && selectedProperty && selectedSensors && selectedSensors.length)) {
+                return;
+            }
 
-        this.toggleDevice = this.toggleDevice.bind(this);
-        this.toggleSensor = this.toggleSensor.bind(this);
+            setLoadingData(true);
+
+            const measurementsData = await measurementsApi.get(token, selectedSensors, selectedProperty);
+            setMeasurements(measurementsData);
+
+            setLoadingData(false);
+        };
+
+        populateMeasurementsData();
+    }, [token, selectedSensors, selectedProperty]);
+
+    const isSelected = (list, item) => {
+        return list.indexOf(item) !== -1;
     }
 
-    componentDidMount() {
-        this.properties();
-        this.devices();
-        this.sensors();
-    }
-
-    selectProperty(property) {
-        this.setState({ selectedProperty: property });
-        this.switchTab(property);
-    }
-
-    switchTab(property, selectedSensors) {
-        if ((property || this.state.selectedProperty) && (selectedSensors || this.state.selectedSensors.length)) {
-            this.measurements(selectedSensors || this.state.selectedSensors, property || this.state.selectedProperty);
-            this.selectTab("chart");
-        }
-        else if (this.state.selectedSensors.length) {
-            this.selectTab("properties");
+    const toggleList = (list, item) => {
+        var array = [...list];
+        if (isSelected(array, item)) {
+            array = array.filter(x => x != item);
         }
         else {
-            this.selectTab("sensors");
-        }
-    }
-
-    toggleDevice(device) {
-        var array = [...this.state.selectedDevices]; // make a separate copy of the array
-        var index = array.indexOf(device.id)
-        if (index !== -1) {
-            array.splice(index, 1);
-        }
-        else  {
-            array.push(device.id);
+            array.push(item);
         }
 
-        console.log(array);
-
-        this.setState({selectedDevices: array});
+        return array;
     }
 
-    toggleSensor(sensor) {
-        var array = [...this.state.selectedSensors]; // make a separate copy of the array
-        var index = array.indexOf(sensor.key)
-        if (index !== -1) {
-            array.splice(index, 1);
-        }
-        else  {
-            array.push(sensor.key);
-        }
-
-        console.log(array);
-
-        this.setState({selectedSensors: array});
-        this.measurements(array, this.state.selectedProperty);
+    const toggleSensor = s => {
+        var list = toggleList(selectedSensors, s);
+        setSelectedSensors(list);
     }
 
-    selectTab(tab) {
-        this.setState({ activeTab: tab });
+    const toggleDevice = d => {
+        var list = toggleList(selectedDevices, d);
+        setSelectedDevices(list);
     }
 
-    isSelectedProperty(property) {
-        return this.state.selectedProperty && property.id === this.state.selectedProperty.id;
-    }
-
-    isSelectedDevice(device) {
-        var index = this.state.selectedDevices.indexOf(device.id)
-        return index !== -1;
-        //return this.state.selectedDevice && device.id == this.state.selectedDevice.id;
-    }
-
-    isSelectedSensor(sensor) {
-        var index = this.state.selectedSensors.indexOf(sensor.key)
-        return index !== -1;
-        //return this.state.selectedDevice && device.id == this.state.selectedDevice.id;
-    }
-
-    render() {
+    const renderData = (properties, devices, sensors, measurements) => {
         return (
-            <Container>
-                <Row>
-                    <Col xs={12} md={12}>
-                        <h1>Measurements</h1>
-                        {
-                            this.state.selectedProperty ?
-                                <p>Showing {this.state.selectedProperty.name}</p> :
-                                <p>Select a property and a device to show measurements</p>
-                        }
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={12} md={12}>
-                        <Tabs id="measurementsTab" activeKey={this.state.activeTab} onSelect={(k) => this.selectTab(k)} variant="pills">
-                            <Tab eventKey="chart" title="Chart">
-                                <MeasurementChart measurements={this.state.measurements} />
-                                <PropertyListSmall properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
-                                <SensorListSmall sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
-                            </Tab>
-                            <Tab eventKey="properties" title="Properties">
-                                <PropertyList properties={this.state.properties} selectProperty={this.selectProperty} selectedProperty={this.isSelectedProperty} />
-                            </Tab>
-                            <Tab eventKey="sensors" title="Sensors">
-                                <SensorList sensors={this.state.sensors} selectSensor={this.toggleSensor} selectedSensor={this.isSelectedSensor} />
-                            </Tab>
-                            <Tab eventKey="devices" title="Devices">
-                                <DeviceList devices={this.state.devices} selectDevice={this.toggleDevice} selectedDevice={this.isSelectedDevice} />
-                            </Tab>
-                            <Tab eventKey="table" title="Table">
-                                <MeasurementTable measurements={this.state.measurements} />
-                            </Tab>
-                        </Tabs>
-                    </Col>
-                </Row>
-            </Container>
+            <Tabs id="measurementsTab" activeKey={activeTab} onSelect={setActiveTab} variant="pills">
+                <Tab eventKey="chart" title="Chart">
+                    {!loadingData ? <MeasurementChart measurements={measurements} /> : "Loading..."}
+                    <PropertyListSmall properties={properties} selectProperty={selectProperty} selectedProperty={p => isSelected([selectedProperty], p)} />
+                    <SensorListSmall sensors={sensors} selectSensor={toggleSensor} selectedSensor={s => isSelected(selectedSensors, s)} />
+                </Tab>
+                <Tab eventKey="properties" title="Properties">
+                    <PropertyList properties={properties} selectProperty={selectProperty} selectedProperty={p => isSelected([selectedProperty], p)} />
+                </Tab>
+                <Tab eventKey="sensors" title="Sensors">
+                    <SensorList sensors={sensors} selectSensor={toggleSensor} selectedSensor={s => isSelected(selectedSensors, s)} />
+                </Tab>
+                <Tab eventKey="devices" title="Devices">
+                    <DeviceList devices={devices} selectDevice={toggleDevice} selectedDevice={d => isSelected(selectedDevices, d)} />
+                </Tab>
+                <Tab eventKey="table" title="Table">
+                {!loadingData ? <MeasurementTable measurements={measurements} /> : "Loading"}
+                </Tab>
+            </Tabs>
         );
     }
 
-    async devices() {
-        const response = await fetch('/api/devices');
-        const data = await response.json();
+    let contents = loading ? (
+        <p>
+            <em>Loading...</em>
+        </p>
+    ) : (
+            renderData(properties, devices, sensors, measurements)
+        );
 
-        this.setState({ devices: data, loading: false });
-        this.switchTab();
-    }
-
-    async sensors() {
-        const response = await fetch('/api/sensors');
-        const data = await response.json();
-
-        this.setState({ sensors: data, loading: false, selectedSensors: data.map(s => s.key) });
-        this.switchTab();
-    }
-
-    async properties() {
-        const response = await fetch('/api/properties');
-        const data = await response.json();
-
-        var property = null;
-
-        if (data && data.length > 0) {
-            property = data[0];
-        }
-
-        this.setState({ properties: data, selectedProperty: property, loading: false });
-
-        this.switchTab();
-    }
-
-    async measurements(sensors, property) {
-        if (!(sensors && property)) {
-            return;
-        }
-
-        var params = sensors.map(s => { return { k: 's', v: s }});
-        params.push({ k: 'p', v: property.id });
-
-        var query = params
-            .map(p => encodeURIComponent(p.k) + '=' + encodeURIComponent(p.v))
-            .join('&');
-
-        const response = await fetch("/api/measurements?" + query);
-
-        var data = null;
-
-        //console.log(response);
-
-        if (response.status === 200) {
-            data = await response.json();
-        }
-
-        this.setState({ measurements: data, loading: false });
-    }
-}
+    return (
+        <Container>
+            <Row>
+                <Col xs={12} md={12}>
+                    <h1>Measurements</h1>
+                    <p>Select a property and a device to show measurements</p>
+                </Col>
+            </Row>
+            <Row>
+                <Col xs={12} md={12}>
+                    {contents}
+                </Col>
+            </Row>
+        </Container>
+    );
+};

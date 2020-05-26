@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Veggerby.Greenhouse.Core;
 
 namespace Veggerby.Greenhouse.Web
@@ -52,6 +54,10 @@ namespace Veggerby.Greenhouse.Web
             {
                 options.Authority = $"https://{Configuration["Auth0:Domain"]}/";
                 options.Audience = Configuration["Auth0:Audience"];
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
             });
         }
 
@@ -67,9 +73,9 @@ namespace Veggerby.Greenhouse.Web
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-                app.UseHttpsRedirection();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 

@@ -279,9 +279,22 @@ while True:
 
 [react-bootstrap](https://react-bootstrap.github.io/)
 
+https://reactjs.org/docs/hooks-effect.html
+
+https://overreacted.io/a-complete-guide-to-useeffect/
+
+https://www.robinwieruch.de/react-hooks-fetch-data
+
+
 ## Auth0
 
 https://auth0.com/blog/how-to-build-and-secure-web-apis-with-aspnet-core-3/#Securing-the-API-with-Auth0
+
+How to implement Client Credentials
+
+https://auth0.com/docs/api-auth/tutorials/client-credentials
+
+### Postman
 
 https://auth0.com/blog/manage-a-collection-of-secure-api-endpoints-with-postman/#Authorization-in-Postman
 
@@ -298,6 +311,23 @@ https://auth0.com/blog/manage-a-collection-of-secure-api-endpoints-with-postman/
 | State                 | random                                                          |
 | Client Authentication | Send client credentials in body                                 |
 
+https://jwt.io/
+
+### React
+
+[Integrating Auth0 in a React App with an ASP.NET Core API backend](https://medium.com/datadigest/integrating-auth0-in-a-react-app-with-an-asp-net-core-api-backend-20a64c0e1f9f) ([code](https://github.com/DataDIGEST/Auth0Sample))
+
+[Auth0 Tutorial](https://auth0.com/docs/quickstart/spa/react/01-login)
+
+### NPM
+
+https://www.carlrippon.com/upgrading-npm-dependencies/
+
+```npx npm-check-updates -u```
+
+and
+
+```npm install```
 
 ## Other stuff
 

@@ -7,7 +7,7 @@ export const SensorListSmall = ({ sensors, selectSensor, selectedSensor }) => se
             <h4>Sensors</h4>
             <ListGroup>
                 {sensors.map(sensor =>
-                    <ListGroup.Item key={sensor.id} action onClick={() => selectSensor(sensor)} active={selectedSensor(sensor)}>
+                    <ListGroup.Item key={sensor.key} action onClick={() => selectSensor(sensor)} active={selectedSensor(sensor)}>
                         <small>{sensor.name} on {sensor.device.name}</small>
                     </ListGroup.Item>
                 )}
