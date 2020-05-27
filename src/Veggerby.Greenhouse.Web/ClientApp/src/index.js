@@ -7,7 +7,7 @@ import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import { Auth0Provider } from "./react-auth0-spa";
 
-import config from "./auth_config.json";
+import authConfig from "./auth_config.json";
 
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
 const rootElement = document.getElementById('root');
@@ -22,9 +22,9 @@ const onRedirectCallback = (appState) => {
 
 ReactDOM.render(
     <Auth0Provider
-        domain={config.domain}
-        client_id={config.clientId}
-        audience={config.audience}
+        domain={authConfig.domain}
+        client_id={authConfig.clientId}
+        audience={authConfig.audience}
         redirect_uri={window.location.origin}
         onRedirectCallback={onRedirectCallback}
     >

@@ -43,8 +43,6 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
             <h2>{measurements[0].property.name}</h2>
             <ResponsiveContainer width="99%" aspect={1.5}>
                 <LineChart
-                    width={840}
-                    height={400}
                     margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
                 >
                     <XAxis dataKey="time" domain={['dataMin', 'dataMax']} type='number' tickFormatter={value => moment.unix(value).fromNow()}>

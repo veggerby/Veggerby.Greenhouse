@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.8.1",
+    "@microsoft/applicationinsights-react-js": "^2.5.4",
+    "@microsoft/applicationinsights-web": "^2.5.4",
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
     "merge": "^1.2.1",

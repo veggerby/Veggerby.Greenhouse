@@ -43,7 +43,7 @@ def take_and_upload_photo(container_name, hflip = False):
         except ResourceExistsError:
             print("Container already exists.")
 
-        remote_file_name = 'photo_' + \
+        remote_file_name = now.strftime('%Y\\%m\\%d') + '\\photo_' + \
             now.replace(microsecond=0).isoformat() + 'Z.jpg'
 
         blob_client = blob_service_client.get_blob_client(

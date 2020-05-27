@@ -79,7 +79,7 @@ https://www.raspberrypi.org/documentation/usage/camera/raspicam/timelapse.md
 
 https://projects.raspberrypi.org/en/projects/getting-started-with-picamera
 
-```pip install picamera```
+`pip install picamera`
 
 https://picamera.readthedocs.org/
 
@@ -135,11 +135,12 @@ https://github.com/PiSupply/PiJuice/tree/master/Software#i2c-command-api
 https://github.com/PiSupply/PiJuice/blob/master/Hardware/README.md#pinout
 
 ### Install CLI
-sudo apt-get install pijuice-base
+
+`sudo apt-get install pijuice-base`
 
 ### Run CLI
 
-pijuice_cli
+`pijuice_cli`
 
 ## Python3/pip
 
@@ -161,7 +162,8 @@ https://pypi.org/project/azure-eventhub/
 https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-python-get-started-send
 
 ### Install Python library
-sudo pip install azure-eventhub
+
+`sudo pip3 install azure-eventhub`
 
 ## Azure Functions
 
@@ -175,7 +177,7 @@ Add the IP to the database access
 
 ### Azure Functions Tools
 
-brew link --overwrite azure-functions-core-tools@3
+`brew link --overwrite azure-functions-core-tools@3`
 
 Can also be installed via npm
 
@@ -187,9 +189,11 @@ https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-py
 
 ### Update tools
 
-dotnet tool update --global dotnet-ef
+`dotnet tool update --global dotnet-ef`
 
 ### Add initial migration
+
+`dotnet ef migrations add InitialCreate --startup-project ../Veggerby.Greenhouse.Migrations/`
 
 ## Crontab
 
@@ -285,9 +289,19 @@ https://overreacted.io/a-complete-guide-to-useeffect/
 
 https://www.robinwieruch.de/react-hooks-fetch-data
 
+https://docs.microsoft.com/en-us/azure/app-service/configure-common
+
+> Note
+> In a default Linux container or a custom Linux container, any nested JSON key
+> structure in the app setting name like ApplicationInsights:InstrumentationKey
+> needs to be configured in App Service as ApplicationInsights__InstrumentationKey
+> for the key name. In other words, any : should be replaced by __ (double underscore).
+
 ### Application Insights
 
 https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
+
+https://www.npmjs.com/package/@microsoft/applicationinsights-react-js [demo](https://github.com/Azure-Samples/application-insights-react-demo)
 
 ## Auth0
 
@@ -326,11 +340,9 @@ https://jwt.io/
 
 https://www.carlrippon.com/upgrading-npm-dependencies/
 
-```npx npm-check-updates -u```
+#### Update all dependencies
 
-and
-
-```npm install```
+Run `npx npm-check-updates -u` followed by `npm install`
 
 ## Other stuff
 

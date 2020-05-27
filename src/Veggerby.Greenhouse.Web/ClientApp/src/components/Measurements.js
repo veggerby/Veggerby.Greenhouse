@@ -103,7 +103,7 @@ export const Measurements = () => {
     const toggleList = (list, item) => {
         var array = [...list];
         if (isSelected(array, item)) {
-            array = array.filter(x => x != item);
+            array = array.filter(x => x !== item);
         }
         else {
             array.push(item);
