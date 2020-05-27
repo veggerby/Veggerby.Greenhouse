@@ -285,6 +285,9 @@ https://overreacted.io/a-complete-guide-to-useeffect/
 
 https://www.robinwieruch.de/react-hooks-fetch-data
 
+### Application Insights
+
+https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
 
 ## Auth0
 
