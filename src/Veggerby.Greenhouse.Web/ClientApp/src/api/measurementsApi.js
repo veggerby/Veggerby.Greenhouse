@@ -10,6 +10,7 @@ export async function get(token, sensors, property) {
 
         var params = sensors.map(s => { return { k: 's', v: s.key }});
         params.push({ k: 'p', v: property.id });
+        params.push({ k: 'h', v: 2 * 24 });
 
         var query = params
             .map(p => encodeURIComponent(p.k) + '=' + encodeURIComponent(p.v))
