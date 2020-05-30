@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Veggerby.Greenhouse.Core
@@ -48,6 +49,8 @@ namespace Veggerby.Greenhouse.Core
         public Device Device { get; set; }
         public Sensor Sensor { get; set; }
         public Property Property { get; set; }
+
+        public IList<Annotation> Annotations { get; set; }
 
         public double AverageValue => SumValue / Count;
     }

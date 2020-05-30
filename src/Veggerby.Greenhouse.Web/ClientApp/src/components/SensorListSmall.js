@@ -14,4 +14,4 @@ export const SensorListSmall = ({ sensors, selectSensor, selectedSensor }) => se
             </ListGroup>
         </div>
     )
-    : 'No devices';
+    : 'No sensors';

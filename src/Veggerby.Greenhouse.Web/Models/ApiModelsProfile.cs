@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoMapper;
 using Veggerby.Greenhouse.Core;
 
@@ -20,9 +21,15 @@ namespace Veggerby.Greenhouse.Web.Models
                 .ReverseMap();
 
             CreateMap<Measurement, MeasurementModel>()
+                .ForPath(x => x.Id, o => o.MapFrom(x => x.MeasurementId))
                 .ForPath(x => x.StartTime, o => o.MapFrom(x => x.FirstTimeUtc))
                 .ForPath(x => x.EndTime, o => o.MapFrom(x => x.LastTimeUtc))
-                .ForPath(x => x.SignalCount, o => o.MapFrom(x => x.Count));
+                .ForPath(x => x.SignalCount, o => o.MapFrom(x => x.Count))
+                .ForPath(x => x.Annotations, o => o.MapFrom(x => x.Annotations != null && x.Annotations.Any() ? x.Annotations : null));
+
+            CreateMap<Annotation, AnnotationModel>()
+                .ForPath(x => x.Id, o => o.MapFrom(x => x.AnnotationId))
+                .ReverseMap();
         }
     }
 }

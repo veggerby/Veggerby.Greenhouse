@@ -16,6 +16,7 @@ namespace Veggerby.Greenhouse.Core
         public DbSet<Sensor> Sensors { get; set; }
         public DbSet<Property> Properties { get; set; }
         public DbSet<Measurement> Measurements { get; set; }
+        public DbSet<Annotation> Annotations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,9 @@ namespace Veggerby.Greenhouse.Core
 
             modelBuilder.Entity<Measurement>()
                 .HasKey(x => x.MeasurementId);
+
+            modelBuilder.Entity<Annotation>()
+                .HasKey(x => x.AnnotationId);
 
             modelBuilder
                 .Entity<Measurement>()
@@ -48,6 +52,12 @@ namespace Veggerby.Greenhouse.Core
                 .HasOne(x => x.Property)
                 .WithMany(x => x.Measurements)
                 .HasForeignKey(x => x.PropertyId);
+
+            modelBuilder
+                .Entity<Annotation>()
+                .HasOne(x => x.Measurement)
+                .WithMany(x => x.Annotations)
+                .HasForeignKey(x => x.MeasurementId);
 
             modelBuilder.SetDateTimeAsUtc();
 

@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Tabs, Tab } from 'react-bootstrap';
+import { Container, Row, Col, Tabs, Tab, Dropdown, DropdownButton, Button } from 'react-bootstrap';
 
-import { DeviceList } from './DeviceList';
-import { PropertyList } from './PropertyList'
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementTable } from './MeasurementTable';
-import { PropertyListSmall } from './PropertyListSmall';
-import { SensorListSmall } from './SensorListSmall';
-import { SensorList } from './SensorList';
 
 import * as sensorsApi from '../api/sensorsApi'
 import * as devicesApi from '../api/devicesApi'
@@ -15,12 +10,15 @@ import * as propertiesApi from '../api/propertiesApi'
 import * as measurementsApi from '../api/measurementsApi'
 
 import { useAuth0 } from "../react-auth0-spa";
+import { PropertyDropdown } from './PropertyDropdown';
+import { SensorDropdown } from './SensorDropdown';
 
 export const Measurements = () => {
     const { getTokenSilently } = useAuth0();
 
     const [loading, setLoading] = useState(true);
     const [loadingData, setLoadingData] = useState(false);
+    const [refresh, setRefresh] = useState(null);
 
     const [activeTab, setActiveTab] = useState('chart');
 
@@ -31,7 +29,7 @@ export const Measurements = () => {
 
     const [selectedProperty, selectProperty] = useState(null);
     const [selectedSensors, setSelectedSensors] = useState([]);
-    const [selectedDevices, setSelectedDevices] = useState([]);
+    const [timeframe, setTimeframe] = useState(1);
 
     const [token, setToken] = useState(null);
 
@@ -87,14 +85,14 @@ export const Measurements = () => {
 
             setLoadingData(true);
 
-            const measurementsData = await measurementsApi.get(token, selectedSensors, selectedProperty);
+            const measurementsData = await measurementsApi.get(token, selectedSensors, selectedProperty, timeframe);
             setMeasurements(measurementsData);
 
             setLoadingData(false);
         };
 
         populateMeasurementsData();
-    }, [token, selectedSensors, selectedProperty]);
+    }, [token, selectedSensors, selectedProperty, timeframe, refresh]);
 
     const isSelected = (list, item) => {
         return list.indexOf(item) !== -1;
@@ -117,32 +115,60 @@ export const Measurements = () => {
         setSelectedSensors(list);
     }
 
-    const toggleDevice = d => {
-        var list = toggleList(selectedDevices, d);
-        setSelectedDevices(list);
-    }
+    const sensorsTitle = () => !(measurements && measurements.length > 0) ? "no sensors" :
+            (measurements.length <= 3 ?
+                measurements.map(m => m.sensor.key)/*`${m.sensor.name} on ${m.sensor.device.name}`)*/.join(', ') :
+                `${measurements.length} sensors`);
+
+    const sensorsTitleSelected = () => !(selectedSensors && selectedSensors.length > 0) ? "no sensors" :
+        (selectedSensors.length <= 3 ?
+            selectedSensors.map(m => m.key)/*`${m.sensor.name} on ${m.sensor.device.name}`)*/.join(', ') :
+            `${selectedSensors.length} sensors`);
 
     const renderData = (properties, devices, sensors, measurements) => {
         return (
-            <Tabs id="measurementsTab" activeKey={activeTab} onSelect={setActiveTab} variant="pills">
-                <Tab eventKey="chart" title="Chart">
-                    {!loadingData ? <MeasurementChart measurements={measurements} /> : "Loading..."}
-                    <PropertyListSmall properties={properties} selectProperty={selectProperty} selectedProperty={p => isSelected([selectedProperty], p)} />
-                    <SensorListSmall sensors={sensors} selectSensor={toggleSensor} selectedSensor={s => isSelected(selectedSensors, s)} />
-                </Tab>
-                <Tab eventKey="properties" title="Properties">
-                    <PropertyList properties={properties} selectProperty={selectProperty} selectedProperty={p => isSelected([selectedProperty], p)} />
-                </Tab>
-                <Tab eventKey="sensors" title="Sensors">
-                    <SensorList sensors={sensors} selectSensor={toggleSensor} selectedSensor={s => isSelected(selectedSensors, s)} />
-                </Tab>
-                <Tab eventKey="devices" title="Devices">
-                    <DeviceList devices={devices} selectDevice={toggleDevice} selectedDevice={d => isSelected(selectedDevices, d)} />
-                </Tab>
-                <Tab eventKey="table" title="Table">
-                {!loadingData ? <MeasurementTable measurements={measurements} /> : "Loading"}
-                </Tab>
-            </Tabs>
+            <Container>
+                <Row className="justify-content-md-left justify-content-lg-left">
+                    <Col xs md="auto" lg="auto">
+                        <PropertyDropdown properties={properties} selectProperty={selectProperty} selectedProperty={p => isSelected([selectedProperty], p)} />
+                    </Col>
+                    <Col xs md="auto" lg="auto">
+                        <SensorDropdown sensors={sensors} selectSensor={toggleSensor} selectedSensor={s => isSelected(selectedSensors, s)} />
+                    </Col>
+                    <Col xs md="auto" lg="auto">
+                        <DropdownButton title="Select time frame">
+                            {[1, 2, 3, 4, 5].map(days =>
+                                (
+                                    <Dropdown.Item key={days} onClick={() => setTimeframe(days)} active={days === timeframe}>
+                                        {days} day{days > 1 ? "s" : ""}
+                                    </Dropdown.Item>
+                                ))
+                            }
+                        </DropdownButton>
+                    </Col>
+                    <Col xs md="auto" lg="auto">
+                        <Button onClick={() => setRefresh(new Date())}>Refresh</Button>
+                    </Col>
+                </Row>
+                <Row style={{ paddingTop: '10px' }}>
+                    <Col>
+                        {!loadingData ?
+                            <>
+                                <h3>{selectedProperty.name} for {sensorsTitle()}</h3>
+                                <Tabs id="measurementsTab" activeKey={activeTab} onSelect={setActiveTab} variant="pills">
+                                    <Tab eventKey="chart" title="Chart">
+                                        <MeasurementChart measurements={measurements} />
+                                    </Tab>
+                                    <Tab eventKey="table" title="Table">
+                                        <MeasurementTable measurements={measurements} />
+                                    </Tab>
+                                </Tabs>
+                                </>
+                            : `Loading ${selectedProperty.name} for ${sensorsTitleSelected()}...`
+                        }
+                    </Col>
+                </Row>
+            </Container>
         );
     }
 

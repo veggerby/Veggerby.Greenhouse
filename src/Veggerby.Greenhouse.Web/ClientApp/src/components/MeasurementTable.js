@@ -12,7 +12,7 @@ export const MeasurementTable = ({ measurements }) => measurements && measuremen
             {
                 measurements.map(m =>
                     <div key={m.sensor.key}>
-                        <h2>{m.property.name} from {m.sensor.name} on {m.sensor.device.name}</h2>
+                        <h4>{m.property.name} from {m.sensor.name} on {m.sensor.device.name}</h4>
                             <Table striped aria-labelledby="tabelLabel">
                                 <thead>
                                     <tr>

@@ -61,12 +61,11 @@ namespace Veggerby.Greenhouse.Web.Controllers
                 .Include(x => x.Device)
                 .Include(x => x.Sensor)
                     .ThenInclude(x => x.Device)
+                .Include(x => x.Annotations)
                 .Where(x => (d.Contains(x.DeviceId) || s.Contains(x.SensorId + "@" + x.DeviceId)) && x.PropertyId == p && x.FirstTimeUtc > time)
                 .OrderByDescending(x => x.FirstTimeUtc)
                 .Take(c > 0 ? c : int.MaxValue)
                 .ToListAsync();
-
-            measurements.Reverse();
 
             if (!measurements.Any())
             {
@@ -75,11 +74,12 @@ namespace Veggerby.Greenhouse.Web.Controllers
 
             var model = measurements
                 .GroupBy(x => x.Sensor)
+                .OrderBy(x => x.Key.SensorId).ThenBy(x => x.Key.DeviceId)
                 .Select(m => new MeasurementsModel
                     {
                         Sensor = _mapper.Map<SensorModel>(m.Key),
                         Property = _mapper.Map<PropertyModel>(property),
-                        Measurements = _mapper.Map<MeasurementModel[]>(m.ToList())
+                        Measurements = _mapper.Map<MeasurementModel[]>(m.OrderBy(x => x.FirstTimeUtc).ToList())
                     }).ToArray();
 
             return Ok(model);

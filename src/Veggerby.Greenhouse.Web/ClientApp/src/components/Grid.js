@@ -7,7 +7,7 @@ class Grid extends Component {
 
         const gwidth = 12 / cols;
 
-        let cells = this.props.children.map((child, ixc) => (<Col key={ixc} sm={6} md={gwidth}>{child}</Col>));
+        let cells = this.props.children.map((child, ixc) => (<Col key={ixc} sm={6} md={gwidth} style={{ padding: "5px" }}>{child}</Col>));
 
         let rows = cells.map((cell, ixc) => ixc % cols === 0 ? cells.slice(ixc, ixc + cols) : null).filter(x => x);
 
