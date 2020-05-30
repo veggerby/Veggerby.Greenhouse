@@ -1,8 +1,9 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
 import React from 'react';
+import { Table } from 'react-bootstrap';
 import moment from 'moment';
 
-let mapMeasurements = (measurements) => {
+const mapMeasurements = (measurements) => {
     var result = [];
 
     measurements.measurements.forEach(measurement => {
@@ -22,11 +23,33 @@ let mapMeasurements = (measurements) => {
 
             result.push({
                 time: moment(measurement.endTime).unix(),
-                value: measurement.averageValue,
-                annotations: measurement.annotations
+                value: measurement.averageValue
             });
         }
     });
+
+    return result;
+};
+
+const getAnnotations = measurements => {
+    const result = [];
+
+    measurements.measurements.forEach(m => {
+        if (m => m.annotations && m.annotations.length) {
+            m.annotations.forEach(a => {
+                result.push(
+                    {
+                        time: moment(m.startTime).unix(),
+                        value: m.averageValue,
+                        title: a.title,
+                        body: a.body,
+                        created: moment(a.createdUtc).unix()
+                    });
+            });
+        }
+    });
+
+    //console.log(result);
 
     return result;
 };
@@ -41,11 +64,11 @@ const colors = [
     '#8dddd0'
 ];
 
-const annotationColor = '#003f5c';
+const annotationColor = '#ccc';//'#003f5c';
 
 let format = (value, property) => value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
 
-const AnnotationDot = (props) => {
+/*const AnnotationDot = (props) => {
     const {
         cx, cy, stroke, payload, value, radius = 8
     } = props;
@@ -74,7 +97,7 @@ const AnnotationDot = (props) => {
     }
 
     return null;
-};
+};*/
 
 const ActiveDot = (props) => {
     const {
@@ -106,6 +129,34 @@ const ActiveDot = (props) => {
     );
 };
 
+const CustomTooltip = props => {
+    const { active, payload, label, wrapperStyle, contentStyle, property } = props;
+
+    return (
+        <div style={wrapperStyle} className="recharts-tooltip-wrapper-top">
+            <div style={contentStyle}>
+                <Table condensed>
+                    <thead>
+                        <tr>
+                            <th>Sensor</th>
+                            <th>Time</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {payload.map(p => (
+                            <tr key={p.name}>
+                                <td>{p.name}</td>
+                                <td>{moment.unix(p.payload.time).toString() + " (" + moment.unix(p.payload.time).fromNow() + ")"}</td>
+                                <td>{format(p.value, property)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>)
+}
+
 export const MeasurementChart = ({ measurements }) => measurements && measurements.length ?
     (
         <ResponsiveContainer width="99%" aspect={1.5}>
@@ -132,13 +183,17 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
 
                 <Tooltip
                     wrapperStyle={{
-                        borderColor: 'white',
+                        border: '1px solid #999',
                         boxShadow: '2px 2px 3px 0px rgb(204, 204, 204)',
                     }}
-                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-                    labelStyle={{ fontWeight: 'bold', color: '#666666' }}
+                    contentStyle={{
+                        padding: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                    }}
+                    content={<CustomTooltip property={measurements[0].property} />}
+/*                    labelStyle={{ fontWeight: 'bold', color: '#666666' }}
                     labelFormatter={v => moment.unix(v).toString() + " (" + moment.unix(v).fromNow() + ")"}
-                    formatter={v => format(v, measurements[0].property)}
+                    formatter={(v, n, p) => format(v, measurements[0].property)+ JSON.stringify(p.payload, null, 2)}*/
                 />
 
                 <CartesianGrid stroke="#f5f5f5" vertical={false} />
@@ -149,13 +204,22 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                         data={mapMeasurements(measurement)}
                         dataKey="value"
                         stroke={colors[ixc % colors.length]}
-                        dot={<AnnotationDot />}
+                        dot={false}
+                        //dot={<AnnotationDot />}
                         activeDot={<ActiveDot radius={10} />}
                         name={measurement.sensor.key}
                         unit={measurements[0].property.unit}
                     />
                 )}
 
+                {measurements.map(measurement => getAnnotations(measurement).map(a =>
+                    <ReferenceLine x={a.time} stroke={annotationColor}>
+                        <Label
+                            value={a.title}
+                            position="insideTop"
+                            style={{ fontSize: '80%' }}></Label>
+                        />
+                    </ReferenceLine>))}
                 <Legend />
             </LineChart>
         </ResponsiveContainer>

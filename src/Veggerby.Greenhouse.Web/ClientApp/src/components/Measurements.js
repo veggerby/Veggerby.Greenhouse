@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCookies } from 'react-cookie';
 import { Container, Row, Col, Tabs, Tab, Dropdown, DropdownButton, Button } from 'react-bootstrap';
 
 import { MeasurementChart } from './MeasurementChart';
@@ -13,7 +14,11 @@ import { useAuth0 } from "../react-auth0-spa";
 import { PropertyDropdown } from './PropertyDropdown';
 import { SensorDropdown } from './SensorDropdown';
 
+const COOKIE_NAME = 'greenhouseMeasurements';
+
 export const Measurements = () => {
+    const [cookies, setCookie, removeCookie] = useCookies([COOKIE_NAME]);
+
     const { getTokenSilently } = useAuth0();
 
     const [loading, setLoading] = useState(true);
@@ -58,7 +63,12 @@ export const Measurements = () => {
             const sensorData = await sensorsApi.get(token);
             setSensors(sensorData);
             if (sensorData && sensorData.length) {
-                setSelectedSensors(sensorData);
+                if (cookies.greenhouseMeasurements) {
+                    setSelectedSensors(sensorData.filter(x => cookies.greenhouseMeasurements.selectedSensors.indexOf(x.key) !== -1));
+                }
+                else {
+                    setSelectedSensors(sensorData);
+                }
             }
 
             const deviceData = await devicesApi.get(token);
@@ -68,7 +78,16 @@ export const Measurements = () => {
             setProperties(propertiesData);
 
             if (propertiesData && propertiesData.length) {
-                selectProperty(propertiesData[0]);
+                if (cookies.greenhouseMeasurements) {
+                    selectProperty(propertiesData.find(x => x.id === cookies.greenhouseMeasurements.selectedProperty));
+                }
+                else {
+                    selectProperty(propertiesData[0]);
+                }
+            }
+
+            if (cookies.greenhouseMeasurements) {
+                setTimeframe(cookies.greenhouseMeasurements.timeframe);
             }
 
             setLoading(false);
@@ -87,6 +106,8 @@ export const Measurements = () => {
 
             const measurementsData = await measurementsApi.get(token, selectedSensors, selectedProperty, timeframe);
             setMeasurements(measurementsData);
+
+            setCookie(COOKIE_NAME, { selectedProperty: selectedProperty.id, selectedSensors: selectedSensors.map(x => x.key), timeframe: timeframe})
 
             setLoadingData(false);
         };

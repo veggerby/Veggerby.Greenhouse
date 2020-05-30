@@ -6,6 +6,7 @@ import history from "./utils/history";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import { Auth0Provider } from "./react-auth0-spa";
+import { CookiesProvider } from 'react-cookie';
 
 import authConfig from "./auth_config.json";
 
@@ -28,9 +29,11 @@ ReactDOM.render(
         redirect_uri={window.location.origin}
         onRedirectCallback={onRedirectCallback}
     >
-        <Router basename={baseUrl} history={history}>
-            <App />
-        </Router>
+        <CookiesProvider>
+            <Router basename={baseUrl} history={history}>
+                <App />
+            </Router>
+        </CookiesProvider>
     </Auth0Provider>,
     rootElement);
 
