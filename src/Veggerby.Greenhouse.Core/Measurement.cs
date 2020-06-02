@@ -26,19 +26,19 @@ namespace Veggerby.Greenhouse.Core
         public DateTime LastTimeUtc { get; set; }
 
         [Column(Order = 6)]
-        public double Value { get; set; }
+        public double? Value { get; set; }
 
         [Column(Order = 7)]
-        public double SumValue { get; set; }
+        public double? SumValue { get; set; }
 
         [Column(Order = 8)]
         public int Count { get; set; } = 1;
 
         [Column(Order = 9)]
-        public double MinValue { get; set; }
+        public double? MinValue { get; set; }
 
         [Column(Order = 10)]
-        public double MaxValue { get; set; }
+        public double? MaxValue { get; set; }
 
         [Column(Order = 11)]
         public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
@@ -52,6 +52,6 @@ namespace Veggerby.Greenhouse.Core
 
         public IList<Annotation> Annotations { get; set; }
 
-        public double AverageValue => SumValue / Count;
+        public double? AverageValue => SumValue / Count;
     }
 }

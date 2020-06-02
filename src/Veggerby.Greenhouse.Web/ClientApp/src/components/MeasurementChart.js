@@ -7,7 +7,7 @@ const mapMeasurements = (measurements) => {
     var result = [];
 
     measurements.measurements.forEach(measurement => {
-        if (measurement.signalCount === 1) {
+        if (measurement.signalCount <= 1) {
             result.push({
                 time: moment(measurement.startTime).unix(),
                 value: measurement.averageValue,
@@ -66,7 +66,7 @@ const colors = [
 
 const annotationColor = '#ccc';//'#003f5c';
 
-let format = (value, property) => value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
+let format = (value, property) => value ? value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit : 'n/a';
 
 /*const AnnotationDot = (props) => {
     const {
@@ -205,6 +205,7 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                         dataKey="value"
                         stroke={colors[ixc % colors.length]}
                         dot={false}
+                        connectNulls={false}
                         //dot={<AnnotationDot />}
                         activeDot={<ActiveDot radius={10} />}
                         name={measurement.sensor.key}

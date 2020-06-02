@@ -123,12 +123,12 @@ namespace Veggerby.Greenhouse
             //var pow = Math.Pow(10, property.Decimals);
             //signal.Value = Math.Round(signal.Value.Value * pow) / pow;
 
-            if (latest != null && Math.Abs(latest.Value - signal.Value.Value) < (property.Tolerance ?? DefaultTolerance))
+            if (latest?.Value != null && signal.Value != null && Math.Abs(latest.Value.Value - signal.Value.Value) < (property.Tolerance ?? DefaultTolerance))
             {
                 latest.LastTimeUtc = signal.TimeUtc;
                 latest.SumValue += signal.Value.Value;
-                latest.MinValue = Math.Min(signal.Value.Value, latest.MinValue);
-                latest.MaxValue = Math.Max(signal.Value.Value, latest.MaxValue);
+                latest.MinValue = Math.Min(signal.Value.Value, latest.MinValue.Value);
+                latest.MaxValue = Math.Max(signal.Value.Value, latest.MaxValue.Value);
                 latest.Count++;
                 latest.UpdatedUtc = DateTime.UtcNow;
             }
@@ -145,11 +145,11 @@ namespace Veggerby.Greenhouse
                     PropertyId = property.PropertyId,
                     FirstTimeUtc = signal.TimeUtc,
                     LastTimeUtc = signal.TimeUtc,
-                    Value = signal.Value.Value,
-                    SumValue = signal.Value.Value,
+                    Value = signal.Value,
+                    SumValue = signal.Value,
                     Count = 1,
-                    MinValue = signal.Value.Value,
-                    MaxValue = signal.Value.Value,
+                    MinValue = signal.Value,
+                    MaxValue = signal.Value,
                     CreatedUtc = now,
                     UpdatedUtc = now
                 };
