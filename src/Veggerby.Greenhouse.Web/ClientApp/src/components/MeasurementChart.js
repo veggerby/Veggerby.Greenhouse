@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import moment from 'moment';
@@ -49,8 +49,6 @@ const getAnnotations = measurements => {
         }
     });
 
-    //console.log(result);
-
     return result;
 };
 
@@ -68,40 +66,9 @@ const annotationColor = '#ccc';//'#003f5c';
 
 let format = (value, property) => value ? value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit : 'n/a';
 
-/*const AnnotationDot = (props) => {
-    const {
-        cx, cy, stroke, payload, value, radius = 8
-    } = props;
-
-    if (payload.annotations && payload.annotations.length) {
-        return (
-
-        <svg
-            x={cx - radius}
-            y={cy - 2 * radius - 2}
-            width={2 * radius}
-            height={2 * radius}
-            viewBox="0 0 1024 1024"
-        >
-            <path
-                style={{ fill: "red" }}
-                d="M832 64 192 64C121.6 64 64 121.6 64 192l0 512c0 70.4 57.6 128 128 128l128 0 132.096 120.448C459.072
-                    957.632 466.88 960 474.432 960 493.824 960 512 944.704 512 922.496L512 832l320 0c70.4 0 128-57.6 128-128L960
-                    192C960 121.6 902.4 64 832 64zM896 704c0 35.328-28.672 64-64 64L512 768c-16.96 0-33.28 6.72-45.248 18.752S448
-                    815.04 448 832l0 30.08-84.864-77.376C351.296 773.952 335.936 768 320 768L192 768c-35.328 0-64-28.672-64-64L128
-                    192c0-35.328 28.672-64 64-64l640 0c35.328 0 64 28.672 64 64L896 704zM736 320l-448 0C270.336 320 256 334.336 256
-                    352S270.336 384 288 384l448 0C753.664 384 768 369.664 768 352S753.664 320 736 320zM736 512l-448 0C270.336
-                    512 256 526.336 256 544S270.336 576 288 576l448 0C753.664 576 768 561.664 768 544S753.664 512 736 512z" />
-        </svg>
-        );
-    }
-
-    return null;
-};*/
-
 const ActiveDot = (props) => {
     const {
-        cx, cy, stroke, payload, value, radius = 3
+        cx, cy, radius = 3
     } = props;
 
     return (
@@ -130,12 +97,16 @@ const ActiveDot = (props) => {
 };
 
 const CustomTooltip = props => {
-    const { active, payload, label, wrapperStyle, contentStyle, property } = props;
+    const { active, payload, wrapperStyle, contentStyle, property } = props;
+
+    if (!active) {
+        return null;
+    }
 
     return (
         <div style={wrapperStyle} className="recharts-tooltip-wrapper-top">
             <div style={contentStyle}>
-                <Table condensed>
+                <Table size="sm">
                     <thead>
                         <tr>
                             <th>Sensor</th>
@@ -163,7 +134,12 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
             <LineChart
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
             >
-                <XAxis dataKey="time" domain={['dataMin', 'dataMax']} type='number' tickFormatter={value => moment.unix(value).fromNow()}>
+                <XAxis
+                    dataKey="time"
+                    domain={['dataMin', 'dataMax']}
+                    type='number'
+                    tickFormatter={value => moment.unix(value).fromNow()}
+                >
                     <Label
                         value="Time"
                         position="insideBottomRight"
@@ -191,9 +167,6 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                         backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     }}
                     content={<CustomTooltip property={measurements[0].property} />}
-/*                    labelStyle={{ fontWeight: 'bold', color: '#666666' }}
-                    labelFormatter={v => moment.unix(v).toString() + " (" + moment.unix(v).fromNow() + ")"}
-                    formatter={(v, n, p) => format(v, measurements[0].property)+ JSON.stringify(p.payload, null, 2)}*/
                 />
 
                 <CartesianGrid stroke="#f5f5f5" vertical={false} />

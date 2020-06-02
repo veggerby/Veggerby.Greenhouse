@@ -17,7 +17,7 @@ import { SensorDropdown } from './SensorDropdown';
 const COOKIE_NAME = 'greenhouseMeasurements';
 
 export const Measurements = () => {
-    const [cookies, setCookie, removeCookie] = useCookies([COOKIE_NAME]);
+    const [cookies, setCookie] = useCookies([COOKIE_NAME]);
 
     const { getTokenSilently } = useAuth0();
 
@@ -94,6 +94,7 @@ export const Measurements = () => {
         };
 
         populateInitialData();
+        // eslint-disable-next-line
     }, [token]);
 
     useEffect(() => {
@@ -113,6 +114,7 @@ export const Measurements = () => {
         };
 
         populateMeasurementsData();
+        // eslint-disable-next-line
     }, [token, selectedSensors, selectedProperty, timeframe, refresh]);
 
     const isSelected = (list, item) => {

@@ -5,7 +5,8 @@ import { useCookies } from 'react-cookie';
 const COOKIE_NAME = 'auth0.is.authenticated';
 
 export const Home = () => {
-    const [cookies, setCookie, removeCookie] = useCookies(['COOKIE_NAME']);
+    // eslint-disable-next-line
+    const [ cookies, setCookie, removeCookie] = useCookies(['COOKIE_NAME']);
 
     return (
         <div>
