@@ -16,6 +16,9 @@ namespace Veggerby.Greenhouse.Core
         public string Name { get; set; }
 
         [Column(Order = 3)]
+        public bool Enabled { get; set; } = true;
+
+        [Column(Order = 4)]
         public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
         public Device Device { get; set; }

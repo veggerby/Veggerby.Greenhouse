@@ -64,10 +64,10 @@ export const Measurements = () => {
             setSensors(sensorData);
             if (sensorData && sensorData.length) {
                 if (cookies.greenhouseMeasurements) {
-                    setSelectedSensors(sensorData.filter(x => cookies.greenhouseMeasurements.selectedSensors.indexOf(x.key) !== -1));
+                    setSelectedSensors(sensorData.filter(x => x.enabled && x.device.enabled && cookies.greenhouseMeasurements.selectedSensors.indexOf(x.key) !== -1));
                 }
                 else {
-                    setSelectedSensors(sensorData);
+                    setSelectedSensors(sensorData.filter(x => x.enabled && x.device.enabled));
                 }
             }
 

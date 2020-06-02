@@ -6,5 +6,6 @@ namespace Veggerby.Greenhouse.Web.Models
         public string Key => $"{Id}@{(Device?.Id ?? "(unknown)")}";
         public DeviceModel Device { get; set; }
         public string Name { get; set; }
+        public bool Enabled { get; set; }
     }
 }

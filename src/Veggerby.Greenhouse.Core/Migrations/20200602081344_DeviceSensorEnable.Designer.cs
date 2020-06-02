@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Veggerby.Greenhouse.Core;
 
 namespace Veggerby.Greenhouse.Core.Migrations
 {
     [DbContext(typeof(GreenhouseContext))]
-    partial class GreenhouseContextModelSnapshot : ModelSnapshot
+    [Migration("20200602081344_DeviceSensorEnable")]
+    partial class DeviceSensorEnable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

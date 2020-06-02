@@ -59,92 +59,104 @@ namespace Veggerby.Greenhouse.Core
                 .WithMany(x => x.Annotations)
                 .HasForeignKey(x => x.MeasurementId);
 
+            modelBuilder
+                .Entity<Device>()
+                .Property(x => x.Enabled)
+                .HasDefaultValue(true);
+
+            modelBuilder
+                .Entity<Sensor>()
+                .Property(x => x.Enabled)
+                .HasDefaultValue(true);
+
             modelBuilder.SetDateTimeAsUtc();
 
-            var now = DateTime.UtcNow;
+            var now = new DateTime(2020, 05, 01, 0, 0,0, DateTimeKind.Utc);
 
-            modelBuilder.Entity<Property>().HasData(
-                new Property
-                {
-                    PropertyId = "temperature",
-                    Name = "Temperature",
-                    Unit = "°C",
-                    Tolerance = 0.15,
-                    Decimals = 3,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "humidity",
-                    Name = "Relative Humidity",
-                    Unit = "%",
-                    Tolerance = 0.5,
-                    Decimals = 3,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "pressure",
-                    Name = "Pressure",
-                    Unit = "mbar",
-                    Tolerance = 1,
-                    Decimals = 1,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "soil_humidity",
-                    Name = "Soil Humidity",
-                    Unit = null,
-                    Tolerance = 100,
-                    Decimals = 0,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "battery_charge",
-                    Name = "Battery Charge",
-                    Unit = "%",
-                    Tolerance = 0.1,
-                    Decimals = 0,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "battery_temperature",
-                    Name = "Battery Temperature",
-                    Unit = "°C",
-                    Tolerance = 0.1,
-                    Decimals = 0,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "battery_voltage",
-                    Name = "Battery Voltage",
-                    Unit = "mV",
-                    Tolerance = 5,
-                    Decimals = 0,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "io_voltage",
-                    Name = "I/O Voltage",
-                    Unit = "mV",
-                    Tolerance = 10,
-                    Decimals = 0,
-                    CreatedUtc = now
-                },
-                new Property
-                {
-                    PropertyId = "io_current",
-                    Name = "I/O Current",
-                    Unit = "mA",
-                    Tolerance = 1,
-                    Decimals = 0,
-                    CreatedUtc = now
-                });
+            modelBuilder.Entity<Property>()
+                .HasData(
+                    new Property
+                    {
+                        PropertyId = "temperature",
+                        Name = "Temperature",
+                        Unit = "°C",
+                        Tolerance = 0.15,
+                        Decimals = 3,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "humidity",
+                        Name = "Relative Humidity",
+                        Unit = "%",
+                        Tolerance = 0.5,
+                        Decimals = 3,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "pressure",
+                        Name = "Pressure",
+                        Unit = "mbar",
+                        Tolerance = 1,
+                        Decimals = 1,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "soil_humidity",
+                        Name = "Soil Humidity",
+                        Unit = null,
+                        Tolerance = 100,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "battery_charge",
+                        Name = "Battery Charge",
+                        Unit = "%",
+                        Tolerance = 0.1,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "battery_temperature",
+                        Name = "Battery Temperature",
+                        Unit = "°C",
+                        Tolerance = 0.1,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "battery_voltage",
+                        Name = "Battery Voltage",
+                        Unit = "mV",
+                        Tolerance = 5,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "io_voltage",
+                        Name = "I/O Voltage",
+                        Unit = "mV",
+                        Tolerance = 10,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "io_current",
+                        Name = "I/O Current",
+                        Unit = "mA",
+                        Tolerance = 1,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    }
+                );
         }
     }
 }

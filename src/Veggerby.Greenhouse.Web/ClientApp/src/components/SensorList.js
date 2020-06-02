@@ -6,7 +6,7 @@ export const SensorList = ({ sensors, selectSensor, selectedSensor }) => sensors
     (
         <Grid cols={2}>
             {sensors.map(sensor =>
-                <Card key={sensor.id} border={selectedSensor && selectedSensor(sensor) ? "primary" : null}>
+                <Card key={sensor.id} border={selectedSensor && selectedSensor(sensor) ? "primary" : null} bg={(!sensor.enabled || !sensor.device.enabled ? "light" : null)} text={(!sensor.enabled || !sensor.device.enabled ? "muted" : null)}>
                     <Card.Body>
                         <Card.Title>{sensor.name}</Card.Title>
                         <Card.Text>

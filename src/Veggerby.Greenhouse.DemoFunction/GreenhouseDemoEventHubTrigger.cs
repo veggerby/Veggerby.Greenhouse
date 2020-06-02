@@ -118,6 +118,11 @@ namespace Veggerby.Greenhouse
             var sensor = await EnsureSensor(device, signal);
             var property = await EnsureProperty(signal);
 
+            if (!device.Enabled || !sensor.Enabled)
+            {
+                return;
+            }
+
             var latest = await GetLatestMeasurement(sensor, property);
 
             //var pow = Math.Pow(10, property.Decimals);

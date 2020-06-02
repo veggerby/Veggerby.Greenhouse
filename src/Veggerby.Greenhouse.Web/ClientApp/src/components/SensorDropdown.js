@@ -6,7 +6,7 @@ export const SensorDropdown = ({ sensors, selectSensor, selectedSensor }) => sen
         <DropdownButton title="Select sensor(s)">
             {sensors.map(sensor =>
                 (
-                    <Dropdown.Item key={sensor.key} onClick={() => selectSensor(sensor)} active={selectedSensor(sensor)}>
+                    <Dropdown.Item key={sensor.key} onClick={() => selectSensor(sensor)} active={selectedSensor(sensor)} disabled={!sensor.enabled || !sensor.device.enabled}>
                         {sensor.name} on {sensor.device.name}
                     </Dropdown.Item>
                 ))
