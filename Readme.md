@@ -112,11 +112,21 @@ The pins of the RHT03 (DHT22) are labeled in the image below.
 | 3   | N/C          | Not Connected                     |
 | 4   | GND          | Ground                            |
 
-### Install Adafruit_DHT library:
+### Install Adafruit DHT library:
+
+https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup
+
+https://github.com/adafruit/Adafruit_CircuitPython_DHT
+
+`sudo pip3 install adafruit-circuitpython-dht`
+
+(may require `sudo apt-get install libgpiod2` and `pip3 install adafruit-circuitpython-lis3dh`)
+
+Deprecated:
 
 https://github.com/adafruit/Adafruit_Python_DHT
 
-pip install Adafruit_DHT
+`pip install Adafruit_DHT`
 
 ## Raspberry PI Zero
 
