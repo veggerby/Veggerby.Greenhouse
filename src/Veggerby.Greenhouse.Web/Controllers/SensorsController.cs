@@ -12,7 +12,7 @@ namespace Veggerby.Greenhouse.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = AuthZ.ReadAll)]
     public class SensorsController : ControllerBase
     {
         private readonly GreenhouseContext _context;
@@ -43,6 +43,92 @@ namespace Veggerby.Greenhouse.Web.Controllers
             var model = _mapper.Map<SensorModel[]>(sensors);
 
             return Ok(model);
+        }
+
+        [HttpGet("{deviceId}/{sensorId}")]
+        public async Task<IActionResult> Get(string deviceId, string sensorId)
+        {
+            var sensor = await _context
+                .Sensors
+                .Include(x => x.Device)
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId && x.SensorId == sensorId);
+
+            if (sensor == null)
+            {
+                return NotFound();
+            }
+
+            var model = _mapper.Map<SensorModel>(sensor);
+
+            return Ok(model);
+        }
+
+        [Authorize(Policy = AuthZ.WriteAll)]
+        [HttpPut("{deviceId}/{sensorId}")]
+        public async Task<IActionResult> Put(string deviceId, string sensorId, [FromBody] SensorModel model)
+        {
+            var sensor = await _context
+                .Sensors
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId && x.SensorId == sensorId);
+
+            var isNew = false;
+
+            if (sensor == null)
+            {
+                var device = await _context
+                    .Devices
+                    .SingleOrDefaultAsync(x => x.DeviceId == deviceId);
+
+                if (device == null)
+                {
+                    return NotFound();
+                }
+
+                isNew = true;
+                sensor = new Sensor { SensorId = sensorId, DeviceId = deviceId };
+            }
+
+            sensor.Name = model.Name;
+            sensor.Enabled = model.Enabled;
+
+            if (isNew)
+            {
+                await _context.Sensors.AddAsync(sensor);
+            }
+            else
+            {
+                _context.Sensors.Update(sensor);
+            }
+
+            await _context.SaveChangesAsync();
+
+            sensor = await _context
+                .Sensors
+                .Include(x => x.Device)
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId && x.SensorId == sensorId);
+
+            model = _mapper.Map<SensorModel>(sensor);
+
+            return isNew ? (IActionResult)Created("/", model) : Ok(model);
+        }
+
+        [Authorize(Policy = AuthZ.WriteAll)]
+        [HttpDelete("{deviceId}/{sensorId}")]
+        public async Task<IActionResult> Delete(string deviceId, string sensorId)
+        {
+            var sensor = await _context
+                .Sensors
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId && x.SensorId == sensorId);
+
+            if (sensor == null)
+            {
+                return NotFound();
+            }
+
+            _context.Sensors.Remove(sensor);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

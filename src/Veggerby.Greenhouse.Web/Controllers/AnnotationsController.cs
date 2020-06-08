@@ -14,13 +14,13 @@ namespace Veggerby.Greenhouse.Web.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Policy = AuthZ.ReadAll)]
-    public class MeasurementsController : ControllerBase
+    public class AnnotationsController : ControllerBase
     {
         private readonly GreenhouseContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<MeasurementsController> _logger;
+        private readonly ILogger<AnnotationsController> _logger;
 
-        public MeasurementsController(GreenhouseContext context, IMapper mapper, ILogger<MeasurementsController> logger)
+        public AnnotationsController(GreenhouseContext context, IMapper mapper, ILogger<AnnotationsController> logger)
         {
             _context = context;
             _mapper = mapper;

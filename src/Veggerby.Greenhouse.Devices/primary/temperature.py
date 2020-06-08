@@ -14,7 +14,7 @@ device = socket.gethostname()
 
 # define channels
 
-DHT_SENSOR = adafruit_dht.DHTBase(False, board.D20, 10000)#DHT22(board.D20)
+DHT_SENSOR = adafruit_dht.DHTBase(False, board.D20, 10000)
 
 # initialize GPIO
 

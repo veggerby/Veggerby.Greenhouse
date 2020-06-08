@@ -14,6 +14,12 @@ using Veggerby.Greenhouse.Core;
 
 namespace Veggerby.Greenhouse.Web
 {
+    public static class AuthZ
+    {
+        public const string ReadAll = "ReadAll";
+        public const string WriteAll = "WriteAll";
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -50,7 +56,8 @@ namespace Veggerby.Greenhouse.Web
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.Authority = $"https://{Configuration["Auth0:Domain"]}/";
                 options.Audience = Configuration["Auth0:Audience"];
@@ -58,6 +65,12 @@ namespace Veggerby.Greenhouse.Web
                 {
                     NameClaimType = ClaimTypes.NameIdentifier
                 };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AuthZ.ReadAll, policy => policy.RequireClaim("permissions", "read:all", "write:all"));
+                options.AddPolicy(AuthZ.WriteAll, policy => policy.RequireClaim("permissions", "write:all"));
             });
 
             services.AddApplicationInsightsTelemetry();

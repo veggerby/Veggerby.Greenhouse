@@ -12,7 +12,7 @@ namespace Veggerby.Greenhouse.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = AuthZ.ReadAll)]
     public class DevicesController : ControllerBase
     {
         private readonly GreenhouseContext _context;
@@ -57,6 +57,64 @@ namespace Veggerby.Greenhouse.Web.Controllers
             var model = _mapper.Map<DeviceModel>(device);
 
             return Ok(model);
+        }
+
+        [Authorize(Policy = AuthZ.WriteAll)]
+        [HttpPut("{deviceId}")]
+        public async Task<IActionResult> Put(string deviceId, [FromBody] DeviceModel model)
+        {
+            var device = await _context
+                .Devices
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId);
+
+            var isNew = false;
+
+            if (device == null)
+            {
+                isNew = true;
+                device = new Device { DeviceId = deviceId };
+            }
+
+            device.Name = model.Name;
+            device.Enabled = model.Enabled;
+
+            if (isNew)
+            {
+                await _context.Devices.AddAsync(device);
+            }
+            else
+            {
+                _context.Devices.Update(device);
+            }
+
+            await _context.SaveChangesAsync();
+
+            device = await _context
+                .Devices
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId);
+
+            model = _mapper.Map<DeviceModel>(device);
+
+            return isNew ? (IActionResult)Created("/", model) : Ok(model);
+        }
+
+        [Authorize(Policy = AuthZ.WriteAll)]
+        [HttpDelete("{deviceId}")]
+        public async Task<IActionResult> Delete(string deviceId)
+        {
+            var device = await _context
+                .Devices
+                .SingleOrDefaultAsync(x => x.DeviceId == deviceId);
+
+            if (device == null)
+            {
+                return NotFound();
+            }
+
+            _context.Devices.Remove(device);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
 
         [HttpGet("{deviceId}/sensors")]
