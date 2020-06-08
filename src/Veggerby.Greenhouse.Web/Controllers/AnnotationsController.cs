@@ -27,62 +27,109 @@ namespace Veggerby.Greenhouse.Web.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery(Name="d")] string[] d, [FromQuery(Name="s")] string[] s, string p, int h = 24, int c = 0)
+        [HttpGet("{annotationId}")]
+        public async Task<IActionResult> Get(int annotationId)
         {
-            d = d ?? Array.Empty<string>();
-            s = s ?? Array.Empty<string>();
+            var annotation = await _context
+                .Annotations
+                .SingleOrDefaultAsync(x => x.AnnotationId == annotationId);
 
-            if (!(d.Any() || s.Any()) || (d.Any() && s.Any()) || string.IsNullOrEmpty(p))
+            if (annotation == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            var devices = await _context.Devices.Where(x => d.Contains(x.DeviceId)).ToListAsync();
-
-            var sensors = await _context.Sensors.Where(x => s.Contains(x.SensorId + "@" + x.DeviceId)).ToListAsync();
-
-            if ((devices?.Any() ?? false) && (sensors?.Any() ?? false))
-            {
-                return BadRequest();
-            }
-
-            var property = await _context.Properties.FindAsync(p);
-
-            if (property == null)
-            {
-                return BadRequest();
-            }
-
-            var time = DateTime.UtcNow.AddHours(-h);
-
-            var measurements = await _context
-                .Measurements
-                .Include(x => x.Device)
-                .Include(x => x.Sensor)
-                    .ThenInclude(x => x.Device)
-                .Include(x => x.Annotations)
-                .Where(x => (d.Contains(x.DeviceId) || s.Contains(x.SensorId + "@" + x.DeviceId)) && x.PropertyId == p && x.FirstTimeUtc > time)
-                .OrderByDescending(x => x.FirstTimeUtc)
-                .Take(c > 0 ? c : int.MaxValue)
-                .ToListAsync();
-
-            if (!measurements.Any())
-            {
-                return NoContent();
-            }
-
-            var model = measurements
-                .GroupBy(x => x.Sensor)
-                .OrderBy(x => x.Key.SensorId).ThenBy(x => x.Key.DeviceId)
-                .Select(m => new MeasurementsModel
-                    {
-                        Sensor = _mapper.Map<SensorModel>(m.Key),
-                        Property = _mapper.Map<PropertyModel>(property),
-                        Measurements = _mapper.Map<MeasurementModel[]>(m.OrderBy(x => x.FirstTimeUtc).ToList())
-                    }).ToArray();
+            var model = _mapper.Map<AnnotationModel>(annotation);
 
             return Ok(model);
+        }
+
+        [HttpPut("{annotationId}")]
+        [Authorize(Policy = AuthZ.WriteAll)]
+        public async Task<IActionResult> Put(int annotationId, [FromBody] AnnotationModel model)
+        {
+            var annotation = await _context
+                .Annotations
+                .FindAsync(annotationId);
+
+            if (annotation == null)
+            {
+                return NotFound();
+            }
+
+            var measurement = await _context
+                .Measurements
+                .FindAsync(model.MeasurementId);
+
+            if (measurement == null)
+            {
+                return BadRequest();
+            }
+
+            annotation.MeasurementId = model.MeasurementId;
+            annotation.Measurement = measurement;
+            annotation.Title = model.Title;
+            annotation.Body = model.Body;
+
+            _context.Annotations.Update(annotation);
+            await _context.SaveChangesAsync();
+
+            model = _mapper.Map<AnnotationModel>(annotation);
+
+            return Ok(model);
+        }
+
+        [HttpPost()]
+        [Authorize(Policy = AuthZ.WriteAll)]
+        public async Task<IActionResult> Post([FromBody] AnnotationModel model)
+        {
+
+            var measurement = await _context
+                .Measurements
+                .FindAsync(model.MeasurementId);
+
+            if (measurement == null)
+            {
+                return BadRequest();
+            }
+
+            var annotation = new Annotation
+            {
+                MeasurementId = model.MeasurementId,
+                Measurement = measurement,
+                Title = model.Title,
+                Body = model.Body
+            };
+
+            await _context.Annotations.AddAsync(annotation);
+            await _context.SaveChangesAsync();
+
+            annotation = await _context
+                .Annotations
+                .SingleOrDefaultAsync(x => x.AnnotationId == annotation.AnnotationId);
+
+            model = _mapper.Map<AnnotationModel>(annotation);
+
+            return Created("/", model);
+        }
+
+        [HttpDelete("{annotationId}")]
+        [Authorize(Policy = AuthZ.WriteAll)]
+        public async Task<IActionResult> HttpDelete(int annotationId)
+        {
+            var annotation = await _context
+                .Annotations
+                .SingleOrDefaultAsync(x => x.AnnotationId == annotationId);
+
+            if (annotation == null)
+            {
+                return BadRequest();
+            }
+
+            _context.Annotations.Remove(annotation);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }
