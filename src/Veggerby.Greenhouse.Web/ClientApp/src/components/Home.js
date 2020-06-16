@@ -11,6 +11,7 @@ const COOKIE_NAME = 'auth0.is.authenticated';
 export const Home = () => {
     const { isAuthenticated, getTokenSilently, loginWithRedirect } = useAuth0();
     const [loading, setLoading] = useState(true);
+    const [refresh, setRefresh] = useState(null);
     const [measurementsTemp, setMeasurementsTemp] = useState([]);
     const [measurementsHumidity, setMeasurementsHumidity] = useState([]);
 
@@ -50,7 +51,7 @@ export const Home = () => {
         populateMeasurementsData('humidity', setMeasurementsHumidity);
 
         // eslint-disable-next-line
-    }, [token]);
+    }, [token, refresh]);
 
     return (
         <Container>
@@ -68,6 +69,8 @@ export const Home = () => {
             <Button onClick={() => { removeCookie(COOKIE_NAME); window.location.reload(true); }}>Remove Auth & Reload</Button>
             &nbsp;
             <Button onClick={() => { removeCookie(COOKIE_NAME); loginWithRedirect({}); }}>Remove Auth & Login</Button>
+            &nbsp;
+            <Button onClick={() => setRefresh(new Date())}>Refresh</Button>
         </Container>
     );
 };
