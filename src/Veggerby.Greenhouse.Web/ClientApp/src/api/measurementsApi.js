@@ -8,7 +8,7 @@ export async function get(token, sensors, property, timeframe) {
             return;
         }
 
-        var params = sensors.map(s => { return { k: 's', v: s.key }});
+        var params = Array.isArray(sensors) ? sensors.map(s => { return { k: 's', v: s.key }}) : [ { k: 's', v: sensors } ];
         params.push({ k: 'p', v: property.id });
         params.push({ k: 'h', v: timeframe * 24 });
 

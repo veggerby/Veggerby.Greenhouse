@@ -6,6 +6,11 @@ export async function handleJsonResponse(response) {
 
         return response.json();
     } else {
+        if (response.status === 401) {
+            console.log('Unauthorized');
+            return null;
+        }
+
         throw new Error(`Error calling api - ${response.statusText}`);
     }
 }

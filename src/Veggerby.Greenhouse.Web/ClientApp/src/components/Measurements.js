@@ -5,10 +5,10 @@ import { Container, Row, Col, Tabs, Tab, Dropdown, DropdownButton, Button } from
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementTable } from './MeasurementTable';
 
-import * as sensorsApi from '../api/sensorsApi'
-import * as devicesApi from '../api/devicesApi'
-import * as propertiesApi from '../api/propertiesApi'
-import * as measurementsApi from '../api/measurementsApi'
+import * as sensorsApi from '../api/sensorsApi';
+import * as devicesApi from '../api/devicesApi';
+import * as propertiesApi from '../api/propertiesApi';
+import * as measurementsApi from '../api/measurementsApi';
 
 import { useAuth0 } from "../react-auth0-spa";
 import { PropertyDropdown } from './PropertyDropdown';

@@ -1,30 +1,74 @@
-import React from 'react';
-import { Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Button, Container, Col, Row } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
+import { MeasurementChart } from './MeasurementChart';
+import { useAuth0 } from '../react-auth0-spa';
+
+import * as measurementsApi from '../api/measurementsApi';
 
 const COOKIE_NAME = 'auth0.is.authenticated';
 
 export const Home = () => {
+    const { isAuthenticated, getTokenSilently, loginWithRedirect } = useAuth0();
+    const [loading, setLoading] = useState(true);
+    const [measurementsTemp, setMeasurementsTemp] = useState([]);
+    const [measurementsHumidity, setMeasurementsHumidity] = useState([]);
+
     // eslint-disable-next-line
-    const [ cookies, setCookie, removeCookie] = useCookies(['COOKIE_NAME']);
+    const [cookies, setCookie, removeCookie] = useCookies(['COOKIE_NAME']);
+
+    const [token, setToken] = useState(null);
+
+    useEffect(() => {
+        const getToken = async () => {
+
+            setLoading(true);
+
+            const token = await getTokenSilently();
+            setToken(token);
+
+            setLoading(false);
+        }
+
+        if (isAuthenticated) {
+            getToken();
+        }
+        // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        const populateMeasurementsData = async (property, set) => {
+            setLoading(true);
+
+        const measurementsData = await measurementsApi.get(token, 'dht22@pi-zero', { id: property }, 1.5);
+            set(measurementsData);
+
+            setLoading(false);
+        };
+
+        populateMeasurementsData('temperature', setMeasurementsTemp);
+        populateMeasurementsData('humidity', setMeasurementsHumidity);
+
+        // eslint-disable-next-line
+    }, [token]);
 
     return (
-        <div>
-            <h1>Hello, world!</h1>
-            <p>Welcome to your new single-page application, built with:</p>
-            <ul>
-                <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-                <li><a href='https://facebook.github.io/react/'>React</a> for client-side code</li>
-                <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-            </ul>
-            <p>To help you get started, we have also set up:</p>
-            <ul>
-                <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-                <li><strong>Development server integration</strong>. In development mode, the development server from <code>create-react-app</code> runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-                <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration produces minified, efficiently bundled JavaScript files.</li>
-            </ul>
-            <p>The <code>ClientApp</code> subdirectory is a standard React application based on the <code>create-react-app</code> template. If you open a command prompt in that directory, you can run <code>npm</code> commands such as <code>npm test</code> or <code>npm install</code>.</p>
-            <Button onClick={() => removeCookie(COOKIE_NAME)}>Remove Auth0 Cookie</Button>
-        </div>
+        <Container>
+            <Row className="justify-content-md-left justify-content-lg-left">
+                <h1>Veggerby Greenhouse</h1>
+            </Row>
+            {isAuthenticated ? (
+                <Row>
+                    <Col>{measurementsTemp ? <MeasurementChart measurements={measurementsTemp} /> : null}</Col>
+                    <Col>{measurementsHumidity ? <MeasurementChart measurements={measurementsHumidity} /> : null}</Col>
+                </Row>
+            ) : null}
+
+
+
+            <Button onClick={() => { removeCookie(COOKIE_NAME); window.location.reload(true); }}>Remove Auth & Reload</Button>
+            &nbsp;
+            <Button onClick={() => { removeCookie(COOKIE_NAME); loginWithRedirect({}); }}>Remove Auth & Login</Button>
+        </Container>
     );
 };
