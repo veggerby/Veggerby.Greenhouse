@@ -128,7 +128,9 @@ const CustomTooltip = props => {
         </div>)
 }
 
-export const MeasurementChart = ({ measurements }) => measurements && measurements.length ?
+const isOkData = (measurements) => measurements && measurements.length;
+
+export const MeasurementChart = ({ measurements, measurementsSecondary }) => isOkData(measurements) ?
     (
         <ResponsiveContainer width="99%" aspect={1.5}>
             <LineChart
@@ -147,7 +149,11 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                     />
                 </XAxis>
 
-                <YAxis dataKey="value" domain={['auto', 'auto']}>
+                <YAxis
+                    yAxisId="primary"
+                    dataKey="value"
+                    domain={['auto', 'auto']}
+                >
                     <Label
                         value={measurements[0].property.name + " (" + measurements[0].property.unit + ")"}
                         unit={measurements[0].property.unit}
@@ -156,6 +162,23 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                         dx={-10}
                     />
                 </YAxis>
+
+                {isOkData(measurementsSecondary) ? (
+                    <YAxis
+                        yAxisId="secondary"
+                        dataKey="value"
+                        domain={['auto', 'auto']}
+                        orientation="right"
+                    >
+                        <Label
+                            value={measurementsSecondary[0].property.name + " (" + measurementsSecondary[0].property.unit + ")"}
+                            unit={measurementsSecondary[0].property.unit}
+                            position="outside"
+                            angle={-90}
+                            dx={10}
+                        />
+                    </YAxis>
+                ) : null}
 
                 <Tooltip
                     wrapperStyle={{
@@ -172,7 +195,7 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                 <CartesianGrid stroke="#f5f5f5" vertical={false} />
                 {measurements.map((measurement, ixc) =>
                     <Line
-                        key={measurement.sensor.key}
+                        key={`${measurement.sensor.key}_${measurements[0].property.id}`}
                         type="monotone"
                         data={mapMeasurements(measurement)}
                         dataKey="value"
@@ -181,10 +204,30 @@ export const MeasurementChart = ({ measurements }) => measurements && measuremen
                         connectNulls={false}
                         //dot={<AnnotationDot />}
                         activeDot={<ActiveDot radius={10} />}
-                        name={measurement.sensor.key}
+                        name={`${measurement.sensor.key}_${measurements[0].property.id}`}
                         unit={measurements[0].property.unit}
+                        yAxisId="primary"
                     />
                 )}
+
+                {isOkData(measurementsSecondary) ?
+                    measurementsSecondary.map((measurement, ixc) =>
+                        <Line
+                            key={`${measurement.sensor.key}_${measurementsSecondary[0].property.id}`}
+                            type="monotone"
+                            data={mapMeasurements(measurement)}
+                            dataKey="value"
+                            stroke={colors[(measurements.length + ixc) % colors.length]}
+                            dot={false}
+                            connectNulls={false}
+                            //dot={<AnnotationDot />}
+                            activeDot={<ActiveDot radius={10} />}
+                            name={`${measurement.sensor.key}_${measurementsSecondary[0].property.id}`}
+                            unit={measurementsSecondary[0].property.unit}
+                            yAxisId="secondary"
+                        />
+                    )
+                : null}
 
                 {measurements.map(measurement => getAnnotations(measurement).map(a =>
                     <ReferenceLine x={a.time} stroke={annotationColor}>

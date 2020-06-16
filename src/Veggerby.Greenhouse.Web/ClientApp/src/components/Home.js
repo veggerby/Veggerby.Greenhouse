@@ -59,8 +59,7 @@ export const Home = () => {
             </Row>
             {isAuthenticated ? (
                 <Row>
-                    <Col>{measurementsTemp ? <MeasurementChart measurements={measurementsTemp} /> : null}</Col>
-                    <Col>{measurementsHumidity ? <MeasurementChart measurements={measurementsHumidity} /> : null}</Col>
+                    <Col>{measurementsTemp ? <MeasurementChart measurements={measurementsTemp} measurementsSecondary={measurementsHumidity} /> : null}</Col>
                 </Row>
             ) : null}
 
