@@ -14,7 +14,7 @@ device = socket.gethostname()
 
 # define channels
 
-DHT_SENSOR = adafruit_dht.DHTBase(False, board.D20, 10000)
+DHT_SENSOR = adafruit_dht.DHT22(board.D20)
 
 # initialize GPIO
 
@@ -41,23 +41,25 @@ client = EventHubProducerClient.from_connection_string(
 
 def add_value(batch, device, sensor, time, property, value):
     data = {'device': device, 'sensor': sensor,
-            'time': now.isoformat() + 'Z', 'property': property, 'value': value}
+            'time': time.isoformat() + 'Z', 'property': property, 'value': value}
 
     print('sensor {0}, {1} = {2}'.format(sensor, property, value))
     batch.add(EventData(json.dumps(data)))
 
 try:
     with client:
-        start_time = time.time()
-
         batch = client.create_batch()
-        now = datetime.utcnow()
 
+        time.sleep(2.5)
+        now_t = datetime.utcnow()
         temperature = DHT_SENSOR.temperature
+
+        time.sleep(2.5)
+        now_h = datetime.utcnow()
         humidity = DHT_SENSOR.humidity
 
-        add_value(batch, device, 'dht22', now, 'temperature', temperature)
-        add_value(batch, device, 'dht22', now, 'humidity', humidity)
+        add_value(batch, device, 'dht22', now_t, 'temperature', temperature)
+        add_value(batch, device, 'dht22', now_h, 'humidity', humidity)
 
         client.send_batch(batch)
 
