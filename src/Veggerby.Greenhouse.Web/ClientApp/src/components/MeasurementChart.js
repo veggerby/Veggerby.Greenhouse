@@ -229,14 +229,14 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                     )
                 : null}
 
-                {measurements.map(measurement => getAnnotations(measurement).map(a =>
+                {/*measurements.map(measurement => getAnnotations(measurement).map(a =>
                     <ReferenceLine x={a.time} stroke={annotationColor}>
                         <Label
                             value={a.title}
                             position="insideTop"
-                            style={{ fontSize: '80%' }}></Label>
+                            style={{ fontSize: '80%' }}
                         />
-                    </ReferenceLine>))}
+                    </ReferenceLine>))*/}
                 <Legend />
             </LineChart>
         </ResponsiveContainer>
