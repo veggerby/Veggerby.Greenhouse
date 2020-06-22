@@ -15,6 +15,8 @@ import { Devices } from './components/Devices';
 import { Sensors } from './components/Sensors';
 import { Measurements } from './components/Measurements';
 
+import { Dashboard } from './components/Dashboard';
+
 const App = () => {
     let appInsights = null;
 
@@ -23,6 +25,7 @@ const App = () => {
             <Layout>
                 <Switch>
                     <Route exact path='/' component={Home} />
+                    <PrivateRoute path='/dashboard/:dashboardId' component={Dashboard} exact />
                     <PrivateRoute path='/properties' component={Properties} />
                     <PrivateRoute path='/devices' component={Devices} />
                     <PrivateRoute path='/sensors' component={Sensors} />

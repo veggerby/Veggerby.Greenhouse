@@ -3,6 +3,8 @@ import { Navbar, Nav, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth0 } from '../react-auth0-spa';
 
+import dashboards from "../dashboards.json";
+
 export const NavMenu = () => {
     const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
@@ -14,6 +16,7 @@ export const NavMenu = () => {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <Nav.Link as={Link} to="/">Home</Nav.Link>
+                        {dashboards.map(dashboard => <Nav.Link as={Link} to={`/dashboard/${dashboard.route}`}>{dashboard.title}</Nav.Link>)}
                         <Nav.Link as={Link} to="/properties">Properties</Nav.Link>
                         <Nav.Link as={Link} to="/devices">Devices</Nav.Link>
                         <Nav.Link as={Link} to="/sensors">Sensors</Nav.Link>

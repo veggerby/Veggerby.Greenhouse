@@ -1,0 +1,56 @@
+[
+    {
+        "title": "Greenhouse",
+        "route": "greenhouse",
+        "charts":
+        [
+            {
+                "title": "Temperature and Humidity",
+                "primary": {
+                    "property": "temperature",
+                    "sensors": [ "dht22@pi-zero" ]
+                },
+                "secondary": {
+                    "property": "humidity",
+                    "sensors": [ "dht22@pi-zero" ]
+                }
+            }
+        ]
+    },
+    {
+        "title": "PIJuice Power",
+        "route": "pijuice-power",
+        "charts":
+        [
+            {
+                "title": "Battery Charge",
+                "primary": {
+                    "property": "battery_charge",
+                    "sensors": [ "pijuice@pi-juice" ]
+                },
+                "secondary": {
+                    "property": "charging",
+                    "sensors": [ "pijuice@pi-juice" ]
+                }
+            },
+            {
+                "title": "Battery Temperature",
+                "primary": {
+                    "property": "battery_temperature",
+                    "sensors": [ "pijuice@pi-juice" ]
+                }
+            },
+            {
+                "title": "Battery Input",
+                "primary": {
+                    "property": "power_input_usb",
+                    "sensors": [ "pijuice@pi-juice" ]
+                },
+                "secondary": {
+                    "property": "power_input_gpio",
+                    "sensors": [ "pijuice@pi-juice" ]
+                }
+            }
+        ]
+    }
+]
