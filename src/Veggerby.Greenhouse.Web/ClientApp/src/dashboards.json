@@ -41,14 +41,10 @@
                 }
             },
             {
-                "title": "Battery Input",
+                "title": "Power Input",
                 "primary": {
-                    "property": "power_input_usb",
-                    "sensors": [ "pijuice@pi-juice" ]
-                },
-                "secondary": {
-                    "property": "power_input_gpio",
-                    "sensors": [ "pijuice@pi-juice" ]
+                    "property": "power_input",
+                    "sensors": [ "pijuice_usb@pi-juice", "pijuice_gpio@pi-juice" ]
                 }
             }
         ]

@@ -138,10 +138,10 @@ def main():
                 status = pijuice.status.GetStatus()
                 add_juice_value_charging(batch, device, 'pijuice',
                                          now, 'charging', status)
-                add_juice_value_power_input(batch, device, 'pijuice',
-                                            now, 'power_input_usb', 'powerInput', status)
-                add_juice_value_power_input(batch, device, 'pijuice',
-                                            now, 'power_input_gpio', 'powerInput5vIo', status)
+                add_juice_value_power_input(batch, device, 'pijuice_usb',
+                                            now, 'power_input', 'powerInput', status)
+                add_juice_value_power_input(batch, device, 'pijuice_gpio',
+                                            now, 'power_input', 'powerInput5vIo', status)
 
                 client.send_batch(batch)
         except Exception:
