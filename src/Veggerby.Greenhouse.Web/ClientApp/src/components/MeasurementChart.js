@@ -2,6 +2,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label, Legend, R
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import moment from 'moment';
+import Number from './Number';
 
 const mapMeasurements = (measurements) => {
     var result = [];
@@ -10,20 +11,23 @@ const mapMeasurements = (measurements) => {
         if (measurement.signalCount <= 1) {
             result.push({
                 time: moment(measurement.startTime).unix(),
-                value: measurement.averageValue,
-                annotations: measurement.annotations
+                value: getValue(measurement.averageValue, measurements.property),
+                annotations: measurement.annotations,
+                property: measurements.property
             });
         }
         else {
             result.push({
                 time: moment(measurement.startTime).unix(),
-                value: measurement.averageValue,
-                annotations: measurement.annotations
+                value: getValue(measurement.averageValue, measurements.property),
+                annotations: measurement.annotations,
+                property: measurements.property
             });
 
             result.push({
                 time: moment(measurement.endTime).unix(),
-                value: measurement.averageValue
+                value: getValue(measurement.averageValue, measurements.property),
+                property: measurements.property
             });
         }
     });
@@ -40,7 +44,7 @@ const getAnnotations = measurements => {
                 result.push(
                     {
                         time: moment(m.startTime).unix(),
-                        value: m.averageValue,
+                        value: getValue(m.averageValue, measurements.property),
                         title: a.title,
                         body: a.body,
                         created: moment(a.createdUtc).unix()
@@ -64,7 +68,30 @@ const colors = [
 
 const annotationColor = '#ccc';//'#003f5c';
 
-let format = (value, property) => value ? value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit : 'n/a';
+let getValue = (value, property) => {
+    if (property.domain) {
+        const v = property.domain.values.find(x => x.lowerValue <= value && x.upperValue >= value);
+        if (v) {
+            return v.name;
+        }
+    }
+
+    return value;
+}
+
+let formatValue = (value, property) => {
+    if (!(value || value === 0)) {
+        return "n/a";
+    }
+
+    if (property.domain) {
+        return value || "n/a";
+    }
+
+    return value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
+}
+
+let formatLabel = (property) => property.name + (property.unit ? " (" + property.unit + ")" : "");
 
 const ActiveDot = (props) => {
     const {
@@ -97,11 +124,13 @@ const ActiveDot = (props) => {
 };
 
 const CustomTooltip = props => {
-    const { active, payload, wrapperStyle, contentStyle, property } = props;
+    const { active, payload, wrapperStyle, contentStyle } = props;
 
     if (!active) {
         return null;
     }
+
+    //console.log(payload);
 
     return (
         <div style={wrapperStyle} className="recharts-tooltip-wrapper-top">
@@ -119,7 +148,7 @@ const CustomTooltip = props => {
                             <tr key={p.name}>
                                 <td>{p.name}</td>
                                 <td>{moment.unix(p.payload.time).toString() + " (" + moment.unix(p.payload.time).fromNow() + ")"}</td>
-                                <td>{format(p.value, property)}</td>
+                                <td><Number value={p.value} decimals={p.payload.property.decimals} suffix={p.payload.property.unit ? ` ${p.payload.property.unit}` : null} /></td>
                             </tr>
                         ))}
                     </tbody>
@@ -152,10 +181,12 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                 <YAxis
                     yAxisId="primary"
                     dataKey="value"
-                    domain={['auto', 'auto']}
+                    domain={measurements[0].property.domain ? measurements[0].property.domain.values.map(x => x.lowerValue) : ['auto', 'auto']}
+                    type={measurements[0].property.domain ? "category" : "number"}
+                    tickFormatter={value => formatValue(value, measurements[0].property)}
                 >
                     <Label
-                        value={measurements[0].property.name + " (" + measurements[0].property.unit + ")"}
+                        value={formatLabel(measurements[0].property)}
                         unit={measurements[0].property.unit}
                         position="outside"
                         angle={-90}
@@ -167,11 +198,13 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                     <YAxis
                         yAxisId="secondary"
                         dataKey="value"
-                        domain={['auto', 'auto']}
+                        domain={measurementsSecondary[0].property.domain ? measurementsSecondary[0].property.domain.values.map(x => x.lowerValue) : ['auto', 'auto']}
                         orientation="right"
+                        type={measurementsSecondary[0].property.domain ? "category" : "number"}
+                        tickFormatter={value => formatValue(value, measurementsSecondary[0].property)}
                     >
                         <Label
-                            value={measurementsSecondary[0].property.name + " (" + measurementsSecondary[0].property.unit + ")"}
+                            value={formatLabel(measurementsSecondary[0].property)}
                             unit={measurementsSecondary[0].property.unit}
                             position="outside"
                             angle={-90}
@@ -189,7 +222,7 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                         padding: '10px',
                         backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     }}
-                    content={<CustomTooltip property={measurements[0].property} />}
+                    content={<CustomTooltip />}
                 />
 
                 <CartesianGrid stroke="#f5f5f5" vertical={false} />
@@ -229,14 +262,14 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                     )
                 : null}
 
-                {/*measurements.map(measurement => getAnnotations(measurement).map(a =>
-                    <ReferenceLine x={a.time} stroke={annotationColor}>
+                {measurements.map(measurement => getAnnotations(measurement).map(a =>
+                    <ReferenceLine x={a.time} stroke={annotationColor} yAxisId="primary">
                         <Label
                             value={a.title}
                             position="insideTop"
                             style={{ fontSize: '80%' }}
                         />
-                    </ReferenceLine>))*/}
+                    </ReferenceLine>))}
                 <Legend />
             </LineChart>
         </ResponsiveContainer>

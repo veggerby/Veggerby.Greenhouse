@@ -28,6 +28,17 @@ export const PropertyList = ({ properties, selectProperty, selectedProperty }) =
                                     <td>Decimals</td>
                                     <td>{property.decimals}</td>
                                 </tr>
+                                {property.domain ? (
+                                    <tr>
+                                        <td>Domain</td>
+                                        <td>
+                                            {property.domain.name}
+                                            <ul>
+                                                {property.domain.values.map(v => <li>{v.name}</li>)}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                ) : null}
                             </tbody>
                         </Table>
                         {selectProperty ?

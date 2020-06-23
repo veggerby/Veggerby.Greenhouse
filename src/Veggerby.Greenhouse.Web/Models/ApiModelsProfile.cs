@@ -23,7 +23,7 @@ namespace Veggerby.Greenhouse.Web.Models
 
             CreateMap<PropertyDomain, PropertyDomainModel>()
                 .ForPath(x => x.Id, o => o.MapFrom(x => x.PropertyDomainId))
-                .ForPath(x => x.Values, o => o.MapFrom(x => x.PropertyDomainValues))
+                .ForPath(x => x.Values, o => o.MapFrom(x => x.PropertyDomainValues.OrderBy(v => v.LowerValue)))
                 .ReverseMap();
 
             CreateMap<PropertyDomainValue, PropertyDomainValueModel>()
