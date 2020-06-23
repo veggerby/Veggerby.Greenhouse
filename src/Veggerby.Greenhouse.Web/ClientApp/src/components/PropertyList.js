@@ -34,7 +34,7 @@ export const PropertyList = ({ properties, selectProperty, selectedProperty }) =
                                         <td>
                                             {property.domain.name}
                                             <ul>
-                                                {property.domain.values.map(v => <li>{v.name}</li>)}
+                                                {property.domain.values.map(v => <li key={v.id}>{v.name}</li>)}
                                             </ul>
                                         </td>
                                     </tr>

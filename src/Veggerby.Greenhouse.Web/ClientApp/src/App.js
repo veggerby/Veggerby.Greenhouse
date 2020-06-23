@@ -18,10 +18,8 @@ import { Measurements } from './components/Measurements';
 import { Dashboard } from './components/Dashboard';
 
 const App = () => {
-    let appInsights = null;
-
     return (
-        <TelemetryProvider instrumentationKey={appInsightsConfig.instrumentationKey} after={() => { appInsights = getAppInsights() }}>
+        <TelemetryProvider instrumentationKey={appInsightsConfig.instrumentationKey} after={() => getAppInsights()}>
             <Layout>
                 <Switch>
                     <Route exact path='/' component={Home} />

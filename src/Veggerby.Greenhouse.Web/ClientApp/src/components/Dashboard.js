@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Container, Col, Row } from 'react-bootstrap';
-import { useCookies } from 'react-cookie';
 import { MeasurementChart } from './MeasurementChart';
 import { useAuth0 } from '../react-auth0-spa';
 
@@ -20,14 +19,16 @@ export const Dashboard = () => {
     const [token, setToken] = useState(null);
 
     useEffect(() => {
+        if (!token) {
+            return;
+        }
+
         const new_dashboard = dashboards.find(d => d.route === dashboardId);
         setDashboard(new_dashboard);
-        setMeasurements([]);
-    }, [dashboardId]);
+    }, [token, dashboardId]);
 
     useEffect(() => {
         const getToken = async () => {
-
             setLoading(true);
 
             const token = await getTokenSilently();
@@ -43,9 +44,29 @@ export const Dashboard = () => {
     }, []);
 
     useEffect(() => {
-        const populateMeasurementsData = async (chart, set) => {
+        if (!token) {
+            return;
+        }
+
+        const populateMeasurementsData = async chart => {
             const measurementsData = await measurementsApi.get(token, chart.sensors.map(s => ({ key: s })), { id: chart.property }, chart.days || 1.5);
-            set(measurementsData);
+            return measurementsData;
+        };
+
+        const getChartData = async chart => {
+            const result = {
+                title: chart.title,
+                primary: null,
+                secondary: null
+            };
+
+            result.primary = await populateMeasurementsData(chart.primary, data => result.primary = data);
+
+            if (chart.secondary) {
+                result.secondary = await populateMeasurementsData(chart.secondary, data => result.secondary = data);
+            }
+
+            return result;
         };
 
         if (!dashboard) {
@@ -53,26 +74,12 @@ export const Dashboard = () => {
             return;
         }
 
-        const full_result = [];
-
         setLoading(true);
 
-        dashboard.charts.map(chart => {
-            let result = { title: chart.title, primary: null, secondary: null };
-            full_result.push(result);
-
-            populateMeasurementsData(chart.primary, data => result.primary = data);
-
-            if (chart.secondary) {
-                populateMeasurementsData(chart.secondary, data => result.secondary = data);
-            }
+        Promise.all(dashboard.charts.map(getChartData)).then(responses => {
+            setMeasurements(responses);
+            setLoading(false);
         });
-
-        setLoading(false);
-
-        setMeasurements(full_result);
-
-        // eslint-disable-next-line
     }, [token, dashboard, refresh]);
 
     return dashboard ? (
@@ -81,16 +88,18 @@ export const Dashboard = () => {
                 <h1>{dashboard.title}</h1>
                 <Button onClick={() => setRefresh(new Date())}>Refresh</Button>
             </Row>
-            {measurements.length ? measurements.map(measurement =>
-                <>
-                    <Row>
-                        <Col>
-                            <h2>{measurement.title}</h2>
-                            {measurement.primary ? <MeasurementChart measurements={measurement.primary} measurementsSecondary={measurement.secondary} /> : null}
-                        </Col>
-                    </Row>
-                </>
-            ) : null}
+            {loading ? (<i>Loading....</i>) :
+                (
+                    measurements.length ? measurements.map((measurement, ixc) =>
+                        <Row key={ixc}>
+                            <Col>
+                                <h2>{measurement.title}</h2>
+                                {measurement.primary ? <MeasurementChart measurements={measurement.primary} measurementsSecondary={measurement.secondary} /> : null}
+                            </Col>
+                        </Row>
+                    ) : null
+                )
+            }
 
         </Container>
     ) : <i>No dashboard found with id {dashboardId}</i>;

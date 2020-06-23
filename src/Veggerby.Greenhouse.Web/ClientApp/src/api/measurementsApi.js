@@ -19,6 +19,7 @@ export async function get(token, sensors, property, timeframe) {
         const response = await fetch(baseUrl + query, {
             headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
         });
+
         return handleJsonResponse(response);
     } catch (error) {
         handleError(error);

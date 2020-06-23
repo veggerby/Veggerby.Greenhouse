@@ -84,11 +84,15 @@ let formatValue = (value, property) => {
         return "n/a";
     }
 
-    if (property.domain) {
+    if (property && property.domain) {
         return value || "n/a";
     }
 
-    return value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals }) + " " + property.unit;
+    const value_str = property
+        ? value.toLocaleString(navigator.language, { minimumFractionDigits: property.decimals, maximumFractionDigits: property.decimals })
+        : value.toLocaleString(navigator.language);
+
+    return  property ? `${value_str} ${property.unit}` : value_str;
 }
 
 let formatLabel = (property) => property.name + (property.unit ? " (" + property.unit + ")" : "");
@@ -183,7 +187,7 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                     dataKey="value"
                     domain={measurements[0].property.domain ? measurements[0].property.domain.values.map(x => x.lowerValue) : ['auto', 'auto']}
                     type={measurements[0].property.domain ? "category" : "number"}
-                    tickFormatter={value => formatValue(value, measurements[0].property)}
+                    tickFormatter={value => formatValue(value)}
                 >
                     <Label
                         value={formatLabel(measurements[0].property)}
@@ -201,7 +205,7 @@ export const MeasurementChart = ({ measurements, measurementsSecondary }) => isO
                         domain={measurementsSecondary[0].property.domain ? measurementsSecondary[0].property.domain.values.map(x => x.lowerValue) : ['auto', 'auto']}
                         orientation="right"
                         type={measurementsSecondary[0].property.domain ? "category" : "number"}
-                        tickFormatter={value => formatValue(value, measurementsSecondary[0].property)}
+                        tickFormatter={value => formatValue(value)}
                     >
                         <Label
                             value={formatLabel(measurementsSecondary[0].property)}
