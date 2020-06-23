@@ -15,6 +15,8 @@ namespace Veggerby.Greenhouse.Core
         public DbSet<Device> Devices { get; set; }
         public DbSet<Sensor> Sensors { get; set; }
         public DbSet<Property> Properties { get; set; }
+        public DbSet<PropertyDomain> PropertyDomains { get; set; }
+        public DbSet<PropertyDomainValue> PropertyDomainValues { get; set; }
         public DbSet<Measurement> Measurements { get; set; }
         public DbSet<Annotation> Annotations { get; set; }
 
@@ -28,6 +30,12 @@ namespace Veggerby.Greenhouse.Core
 
             modelBuilder.Entity<Property>()
                 .HasKey(x => x.PropertyId);
+
+            modelBuilder.Entity<PropertyDomain>()
+                .HasKey(x => x.PropertyDomainId);
+
+            modelBuilder.Entity<PropertyDomainValue>()
+                .HasKey(x => new { x.PropertyDomainId, x.PropertyDomainValueId } );
 
             modelBuilder.Entity<Measurement>()
                 .HasKey(x => x.MeasurementId);
@@ -60,6 +68,18 @@ namespace Veggerby.Greenhouse.Core
                 .HasForeignKey(x => x.MeasurementId);
 
             modelBuilder
+                .Entity<Property>()
+                .HasOne(x => x.PropertyDomain)
+                .WithMany(x => x.Properties)
+                .HasForeignKey(x => x.PropertyDomainId);
+
+            modelBuilder
+                .Entity<PropertyDomainValue>()
+                .HasOne(x => x.PropertyDomain)
+                .WithMany(x => x.PropertyDomainValues)
+                .HasForeignKey(x => x.PropertyDomainId);
+
+            modelBuilder
                 .Entity<Device>()
                 .Property(x => x.Enabled)
                 .HasDefaultValue(true);
@@ -72,6 +92,80 @@ namespace Veggerby.Greenhouse.Core
             modelBuilder.SetDateTimeAsUtc();
 
             var now = new DateTime(2020, 05, 01, 0, 0,0, DateTimeKind.Utc);
+
+            modelBuilder.Entity<PropertyDomain>()
+                .HasData(
+                    new PropertyDomain
+                    {
+                        PropertyDomainId = "charging",
+                        Name = "Charging Discrete Values",
+                        CreatedUtc = now
+                    },
+                    new PropertyDomain
+                    {
+                        PropertyDomainId = "power_input",
+                        Name = "Power Input Discrete Values",
+                        CreatedUtc = now
+                    }
+                );
+
+            modelBuilder.Entity<PropertyDomainValue>()
+                .HasData(
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "not_charging",
+                        PropertyDomainId = "charging",
+                        Name = "NOT CHARGING",
+                        LowerValue = 0,
+                        UpperValue = 0,
+                        CreatedUtc = now
+                    },
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "charging",
+                        PropertyDomainId = "charging",
+                        Name = "CHARGING",
+                        LowerValue = 1,
+                        UpperValue = 1,
+                        CreatedUtc = now
+                    },
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "not_present",
+                        PropertyDomainId = "power_input",
+                        Name = "NOT_PRESENT",
+                        LowerValue = -1,
+                        UpperValue = -1,
+                        CreatedUtc = now
+                    },
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "bad",
+                        PropertyDomainId = "power_input",
+                        Name = "BAD",
+                        LowerValue = 0,
+                        UpperValue = 0,
+                        CreatedUtc = now
+                    },
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "weak",
+                        PropertyDomainId = "power_input",
+                        Name = "WEAK",
+                        LowerValue = 1,
+                        UpperValue = 1,
+                        CreatedUtc = now
+                    },
+                    new PropertyDomainValue
+                    {
+                        PropertyDomainValueId = "present",
+                        PropertyDomainId = "power_input",
+                        Name = "PRESENT",
+                        LowerValue = 2,
+                        UpperValue = 2,
+                        CreatedUtc = now
+                    }
+                );
 
             modelBuilder.Entity<Property>()
                 .HasData(
@@ -140,6 +234,15 @@ namespace Veggerby.Greenhouse.Core
                     },
                     new Property
                     {
+                        PropertyId = "battery_current",
+                        Name = "Battery Current",
+                        Unit = "mA",
+                        Tolerance = 1,
+                        Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
                         PropertyId = "io_voltage",
                         Name = "I/O Voltage",
                         Unit = "mV",
@@ -154,6 +257,26 @@ namespace Veggerby.Greenhouse.Core
                         Unit = "mA",
                         Tolerance = 1,
                         Decimals = 0,
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "charging",
+                        Name = "Is Battery Charging?",
+                        Unit = "",
+                        Tolerance = 0.01,
+                        Decimals = 0,
+                        PropertyDomainId = "charging",
+                        CreatedUtc = now
+                    },
+                    new Property
+                    {
+                        PropertyId = "power_input",
+                        Name = "Power Input",
+                        Unit = "",
+                        Tolerance = 0.01,
+                        Decimals = 0,
+                        PropertyDomainId = "power_input",
                         CreatedUtc = now
                     }
                 );

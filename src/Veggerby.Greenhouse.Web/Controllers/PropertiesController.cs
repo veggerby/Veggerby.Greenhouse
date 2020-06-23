@@ -31,6 +31,8 @@ namespace Veggerby.Greenhouse.Web.Controllers
         {
             var properties = await _context
                 .Properties
+                .Include(x => x.PropertyDomain)
+                    .ThenInclude(x => x.PropertyDomainValues)
                 .OrderByDescending(x => x.PropertyId)
                 .ToListAsync();
 
@@ -47,7 +49,11 @@ namespace Veggerby.Greenhouse.Web.Controllers
         [HttpGet("{propertyId}")]
         public async Task<IActionResult> Get(string propertyId)
         {
-            var property = await _context.Properties.SingleOrDefaultAsync(x => x.PropertyId == propertyId);
+            var property = await _context
+                .Properties
+                .Include(x => x.PropertyDomain)
+                    .ThenInclude(x => x.PropertyDomainValues)
+                .SingleOrDefaultAsync(x => x.PropertyId == propertyId);
 
             if (property == null)
             {

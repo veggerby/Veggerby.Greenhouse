@@ -18,6 +18,16 @@ namespace Veggerby.Greenhouse.Web.Models
 
             CreateMap<Property, PropertyModel>()
                 .ForPath(x => x.Id, o => o.MapFrom(x => x.PropertyId))
+                .ForPath(x => x.Domain, o => o.MapFrom(x => x.PropertyDomain))
+                .ReverseMap();
+
+            CreateMap<PropertyDomain, PropertyDomainModel>()
+                .ForPath(x => x.Id, o => o.MapFrom(x => x.PropertyDomainId))
+                .ForPath(x => x.Values, o => o.MapFrom(x => x.PropertyDomainValues))
+                .ReverseMap();
+
+            CreateMap<PropertyDomainValue, PropertyDomainValueModel>()
+                .ForPath(x => x.Id, o => o.MapFrom(x => x.PropertyDomainValueId))
                 .ReverseMap();
 
             CreateMap<Measurement, MeasurementModel>()

@@ -47,7 +47,11 @@ namespace Veggerby.Greenhouse.Web.Controllers
                 return BadRequest();
             }
 
-            var property = await _context.Properties.FindAsync(p);
+            var property = await _context
+                .Properties
+                .Include(x => x.PropertyDomain)
+                .ThenInclude(x => x.PropertyDomainValues)
+                .SingleOrDefaultAsync(x => x.PropertyId == p);
 
             if (property == null)
             {

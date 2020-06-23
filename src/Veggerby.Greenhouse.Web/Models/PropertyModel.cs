@@ -7,5 +7,6 @@ namespace Veggerby.Greenhouse.Web.Models
         public string Unit { get; set; }
         public double Tolerance { get; set; }
         public int Decimals { get; set; }
+        public PropertyDomainModel Domain { get; set; }
     }
 }

@@ -22,8 +22,13 @@ namespace Veggerby.Greenhouse.Core
         public int Decimals { get; set; } = 3;
 
         [Column(Order = 5)]
+        public string PropertyDomainId { get; set; }
+
+        [Column(Order = 6)]
         public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
         public IList<Measurement> Measurements { get; set; }
+
+        public PropertyDomain PropertyDomain { get; set; }
     }
 }

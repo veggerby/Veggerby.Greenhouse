@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Veggerby.Greenhouse.Core;
 
 namespace Veggerby.Greenhouse.Core.Migrations
 {
     [DbContext(typeof(GreenhouseContext))]
-    partial class GreenhouseContextModelSnapshot : ModelSnapshot
+    [Migration("20200622144752_AddDomainValues")]
+    partial class AddDomainValues
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,7 +245,6 @@ namespace Veggerby.Greenhouse.Core.Migrations
                             CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Decimals = 0,
                             Name = "Is Battery Charging?",
-                            PropertyDomainId = "charging",
                             Tolerance = 0.01,
                             Unit = ""
                         },
@@ -253,7 +254,6 @@ namespace Veggerby.Greenhouse.Core.Migrations
                             CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Decimals = 0,
                             Name = "Power Input",
-                            PropertyDomainId = "power_input",
                             Tolerance = 0.01,
                             Unit = ""
                         });
@@ -273,20 +273,6 @@ namespace Veggerby.Greenhouse.Core.Migrations
                     b.HasKey("PropertyDomainId");
 
                     b.ToTable("PropertyDomains");
-
-                    b.HasData(
-                        new
-                        {
-                            PropertyDomainId = "charging",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Charging Discrete Values"
-                        },
-                        new
-                        {
-                            PropertyDomainId = "power_input",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Power Input Discrete Values"
-                        });
                 });
 
             modelBuilder.Entity("Veggerby.Greenhouse.Core.PropertyDomainValue", b =>
@@ -312,62 +298,6 @@ namespace Veggerby.Greenhouse.Core.Migrations
                     b.HasKey("PropertyDomainId", "PropertyDomainValueId");
 
                     b.ToTable("PropertyDomainValues");
-
-                    b.HasData(
-                        new
-                        {
-                            PropertyDomainId = "charging",
-                            PropertyDomainValueId = "not_charging",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = 0.0,
-                            Name = "NOT CHARGING",
-                            UpperValue = 0.0
-                        },
-                        new
-                        {
-                            PropertyDomainId = "charging",
-                            PropertyDomainValueId = "charging",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = 1.0,
-                            Name = "CHARGING",
-                            UpperValue = 1.0
-                        },
-                        new
-                        {
-                            PropertyDomainId = "power_input",
-                            PropertyDomainValueId = "not_present",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = -1.0,
-                            Name = "NOT_PRESENT",
-                            UpperValue = -1.0
-                        },
-                        new
-                        {
-                            PropertyDomainId = "power_input",
-                            PropertyDomainValueId = "bad",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = 0.0,
-                            Name = "BAD",
-                            UpperValue = 0.0
-                        },
-                        new
-                        {
-                            PropertyDomainId = "power_input",
-                            PropertyDomainValueId = "weak",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = 1.0,
-                            Name = "WEAK",
-                            UpperValue = 1.0
-                        },
-                        new
-                        {
-                            PropertyDomainId = "power_input",
-                            PropertyDomainValueId = "present",
-                            CreatedUtc = new DateTime(2020, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LowerValue = 2.0,
-                            Name = "PRESENT",
-                            UpperValue = 2.0
-                        });
                 });
 
             modelBuilder.Entity("Veggerby.Greenhouse.Core.Sensor", b =>
