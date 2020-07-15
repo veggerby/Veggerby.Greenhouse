@@ -48,8 +48,8 @@ export const Dashboard = () => {
             return;
         }
 
-        const populateMeasurementsData = async chart => {
-            const measurementsData = await measurementsApi.get(token, chart.sensors.map(s => ({ key: s })), { id: chart.property }, chart.days || 1.5);
+        const populateMeasurementsData = async (chart, days) => {
+            const measurementsData = await measurementsApi.get(token, chart.sensors.map(s => ({ key: s })), { id: chart.property }, days || 1.5);
             return measurementsData;
         };
 
@@ -60,10 +60,10 @@ export const Dashboard = () => {
                 secondary: null
             };
 
-            result.primary = await populateMeasurementsData(chart.primary, data => result.primary = data);
+            result.primary = await populateMeasurementsData(chart.primary, chart.days);
 
             if (chart.secondary) {
-                result.secondary = await populateMeasurementsData(chart.secondary, data => result.secondary = data);
+                result.secondary = await populateMeasurementsData(chart.secondary, chart.days);
             }
 
             return result;

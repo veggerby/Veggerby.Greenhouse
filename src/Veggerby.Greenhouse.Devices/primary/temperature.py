@@ -5,10 +5,14 @@ import socket
 import os
 
 import board
-import board
 import adafruit_dht
 
 import RPi.GPIO as GPIO
+
+import busio
+import digitalio
+import adafruit_mcp3xxx.mcp3008 as MCP
+from adafruit_mcp3xxx.analog_in import AnalogIn
 
 from datetime import datetime
 from azure.eventhub import EventHubProducerClient, EventData
@@ -43,6 +47,15 @@ def main():
     with tracer.span(name="measurement") as span:
         DHT_SENSOR = adafruit_dht.DHT22(board.D20)
 
+        # create the spi bus
+        spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+
+        # create the cs (chip select)
+        cs = digitalio.DigitalInOut(board.D5)
+
+        # create the mcp object
+        mcp = MCP.MCP3008(spi, cs)
+
         # initialize Azure Event Hub
 
         # Address can be in either of these formats:
@@ -76,6 +89,18 @@ def main():
                 humidity = DHT_SENSOR.humidity
                 add_value(batch, device, 'dht22',
                           now_h, 'humidity', humidity)
+
+            with span.span(name="soil_1"):
+                now_h = datetime.utcnow()
+                soil_humidity_1 = AnalogIn(mcp, 0).value # sensor 1 = channel 0
+                add_value(batch, device, 'sf_soil_1',
+                            now_h, 'soil_humidity', soil_humidity_1)
+
+            with span.span(name="soil_2"):
+                now_h = datetime.utcnow()
+                soil_humidity_2 = AnalogIn(mcp, 1).value # sensor 2 = channel 1
+                add_value(batch, device, 'sf_soil_2',
+                            now_h, 'soil_humidity', soil_humidity_2)
 
             with tracer.span(name="sending messages") as span:
                 client.send_batch(batch)

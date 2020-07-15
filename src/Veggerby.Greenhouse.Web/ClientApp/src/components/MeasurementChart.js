@@ -95,9 +95,9 @@ let formatValue = (value, property) => {
     return  property ? `${value_str} ${property.unit}` : value_str;
 }
 
-let formatLabel = (property) => property.name + (property.unit ? " (" + property.unit + ")" : "");
+let formatLabel = property => property.name + (property.unit ? " (" + property.unit + ")" : "");
 
-const ActiveDot = (props) => {
+const ActiveDot = props => {
     const {
         cx, cy, radius = 3
     } = props;

@@ -6,6 +6,7 @@
         [
             {
                 "title": "Temperature and Humidity",
+                "days": 2,
                 "primary": {
                     "property": "temperature",
                     "sensors": [ "dht22@pi-zero" ]
@@ -13,6 +14,14 @@
                 "secondary": {
                     "property": "humidity",
                     "sensors": [ "dht22@pi-zero" ]
+                }
+            },
+            {
+                "title": "Soil Humidity",
+                "days": 2,
+                "primary": {
+                    "property": "soil_humidity",
+                    "sensors": [ "sf_soil_1@pi-zero", "sf_soil_2@pi-zero" ]
                 }
             }
         ]

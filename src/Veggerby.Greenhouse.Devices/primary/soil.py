@@ -20,7 +20,6 @@ soil_channel = MCP.P5
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(led_channel, GPIO.OUT)
 
 # initialize Azure Event Hub
 
