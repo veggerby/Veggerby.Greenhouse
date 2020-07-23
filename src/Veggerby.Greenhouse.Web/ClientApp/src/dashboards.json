@@ -22,6 +22,10 @@
                 "primary": {
                     "property": "soil_humidity",
                     "sensors": [ "sf_soil_1@pi-zero", "sf_soil_2@pi-zero" ]
+                },
+                "secondary": {
+                    "property": "humidity",
+                    "sensors": [ "dht22@pi-zero" ]
                 }
             }
         ]
